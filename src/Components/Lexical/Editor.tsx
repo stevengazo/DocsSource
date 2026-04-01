@@ -20,9 +20,10 @@ import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
 import theme from './theme';
 import { $getRoot } from 'lexical';
+import type{ RootNode } from '../../types/DocumentNodes';
 
 interface EditorProps {
-  document: any;
+  content: any;
   updateDocument: (doc: any) => void;
 }
 
@@ -30,10 +31,10 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export default function Editor({ document, updateDocument }: EditorProps): JSX.Element {
+export default function Editor({ content, updateDocument }: EditorProps): JSX.Element {
   const { theme: appTheme } = useTheme();
 
-  const [editorJSON, setEditorJSON] = useState<string>(JSON.stringify(document.content || {}));
+  const [editorJSON, setEditorJSON] = useState<string>(JSON.stringify(content || {}));
   const [tab, setTab] = useState<'editor' | 'debug'>('editor');
   const [headings, setHeadings] = useState<{ text: string; level: number; id: string }[]>([]);
 
@@ -54,9 +55,10 @@ export default function Editor({ document, updateDocument }: EditorProps): JSX.E
   }), []);
 
   const onChange = (editorState: import('lexical').EditorState, editor: import('lexical').LexicalEditor) => {
-    const json = editorState.toJSON();
-    setEditorJSON(JSON.stringify(json));
+    const serialized = editorState.toJSON();
+    setEditorJSON(JSON.stringify(serialized));
 
+    // Reconstruir headings
     editor.update(() => {
       const root = $getRoot();
       const newHeadings: { text: string; level: number; id: string }[] = [];
@@ -70,8 +72,22 @@ export default function Editor({ document, updateDocument }: EditorProps): JSX.E
       setHeadings(newHeadings);
     });
 
+    // Reconstruir un RootNode compatible con tu tipo Document
+    const newRootNode: RootNode = {
+      type: 'root',
+      version: 1,
+      children: serialized.root?.children || [],
+      format: '',
+      indent: 0,
+      direction: null,
+    };
+
     // Actualizar documento
-    updateDocument({ ...document, content: json, updatedAt: new Date() });
+    updateDocument({
+      ...content,
+      content: newRootNode,
+      updatedAt: new Date(),
+    });
   };
 
   const handleImageUpload = async (files: File[], editor: import('lexical').LexicalEditor) => {

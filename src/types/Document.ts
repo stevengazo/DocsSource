@@ -1,4 +1,5 @@
-import type {  RootNode } from "./DocumentNodes";
+// src/types/Document.ts
+import type { RootNode } from "./DocumentNodes";
 
 export interface Document {
   id: string;
@@ -8,6 +9,6 @@ export interface Document {
   updatedAt: Date;
   author: string;
 
-  // Contenido del documento
+  // Contenido del documento siempre como RootNode
   content: RootNode;
 }

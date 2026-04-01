@@ -16,7 +16,7 @@ export default function EditorPage() {
   useEffect(() => {
     console.log(id)
     const doc = getDocument(id);
-    console.log(doc)
+    console.log("Documento",doc)
     if (doc) setDocument(doc);
   }, [id]);
 
@@ -128,7 +128,7 @@ export default function EditorPage() {
           <h3 className="text-lg font-semibold">Editor</h3>
         </div>
 
-        <Editor document={document.content} updateDocument={handleUpdateDocument} />
+        <Editor content={document.content} updateDocument={handleUpdateDocument} />
       </motion.div>
     </div>
   );

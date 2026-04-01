@@ -1,9 +1,6 @@
-// Nodo raíz
-export interface RootNode extends BaseNode {
-  type: "root";
-  children: Node[];
-}
+// src/types/DocumentNodes.ts
 
+// Tipos de nodos
 export type NodeType =
   | "root"
   | "heading"
@@ -14,6 +11,7 @@ export type NodeType =
   | "listitem"
   | "image";
 
+// Base de todos los nodos
 export interface BaseNode {
   type: NodeType;
   version: number;
@@ -90,3 +88,24 @@ export type Node =
   | ListNode
   | ListItemNode
   | ImageNode;
+
+// Estado JSON inicial del editor
+export const initialEditorState: RootNode = {
+  type: "root",
+  version: 1,
+  format: "",
+  indent: 0,
+  direction: null,
+  children: [
+    {
+      type: "paragraph",
+      version: 1,
+      format: "",
+      indent: 0,
+      direction: null,
+      textFormat: 0,
+      textStyle: "",
+      children: [],
+    },
+  ],
+};
