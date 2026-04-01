@@ -9,11 +9,23 @@ export default function InitContentPlugin({ initialContent }: InitContentPluginP
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    if (!initialContent) return;
+    if (!initialContent) {
+      console.warn('InitContentPlugin: initialContent is undefined or null');
+      return;
+    }
 
-    editor.update(() => {
-      editor.setEditorState(editor.parseEditorState(JSON.stringify(initialContent)));
-    });
+    if (!initialContent.children) {
+      console.warn('InitContentPlugin: initialContent has no children', initialContent);
+    }
+
+    try {
+      editor.update(() => {
+        console.log('InitContentPlugin: loading initial content', initialContent);
+        editor.setEditorState(editor.parseEditorState(JSON.stringify(initialContent)));
+      });
+    } catch (err) {
+      console.error('InitContentPlugin: failed to set editor state', err, initialContent);
+    }
   }, [editor, initialContent]);
 
   return null;

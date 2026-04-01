@@ -16,12 +16,12 @@ import { useTheme } from '../../context/ThemeContext';
 
 import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
-import InitContentPlugin from './plugins/InitContentPlugin'
+import InitContentPlugin from './plugins/InitContentPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
 import theme from './theme';
 import { $getRoot } from 'lexical';
-import type{ RootNode } from '../../types/DocumentNodes';
+import type { RootNode } from '../../types/DocumentNodes';
 
 interface EditorProps {
   content: any;
@@ -29,10 +29,12 @@ interface EditorProps {
 }
 
 function onError(error: Error): void {
-  console.error(error);
+ // console.error(error);
 }
 
 export default function Editor({ content, updateDocument }: EditorProps): JSX.Element {
+  console.log("contenido",content)
+
   const { theme: appTheme } = useTheme();
 
   const [editorJSON, setEditorJSON] = useState<string>(JSON.stringify(content || {}));
@@ -49,9 +51,9 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
       ListNode,
       ListItemNode,
       LinkNode,
-      ImageNode,
       AutoLinkNode,
       DividerNode,
+      ImageNode,
     ],
   }), []);
 
@@ -83,7 +85,6 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
       direction: null,
     };
 
-    // Actualizar documento
     updateDocument(newRootNode);
   };
 
@@ -131,6 +132,9 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
             </div>
 
             <LexicalComposer initialConfig={initialConfig}>
+              {/* Cargar contenido inicial */}
+              <InitContentPlugin initialContent={content} />
+
               {tab === 'editor' && (
                 <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
                   <ToolbarPlugin onUploadImages={handleImageUpload} />
