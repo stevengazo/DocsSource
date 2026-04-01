@@ -5,28 +5,35 @@ import Editor from './../Components/Lexical/Editor';
 import { useDocumentsContext } from '../context/DocumentsContext';
 import  type { Document } from '../types/Document';
 import { useParams } from 'react-router-dom';
+import type { RootNode } from '../types/DocumentNodes';
 
 export default function EditorPage() {
   const { id } = useParams<{ id: string }>();
-  console.log(id)
+
   const { updateDocument, getDocument } = useDocumentsContext();
   const [document, setDocument] = useState<Document | undefined>();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    console.log(id)
     const doc = getDocument(id);
-    console.log("Documento",doc)
     if (doc) setDocument(doc);
   }, [id]);
 
-  // Función para actualizar tanto el estado local como el contexto
-  const handleUpdateDocument = (updatedContent: any) => {
-    if (!document) return;
-    const updatedDoc = { ...document, content: updatedContent, updatedAt: new Date() };
-    setDocument(updatedDoc);
-    updateDocument( document.id, updatedDoc);
+// Función para actualizar tanto el estado local como el contexto
+const handleUpdateDocument = (updatedContent: RootNode) => {
+
+  if (!document) return;
+
+  // Crear el documento actualizado con el RootNode correcto
+  const updatedDoc = {
+    ...document,
+    content: updatedContent, // ✅ RootNode directo
+    updatedAt: new Date(),
   };
+  updateDocument(document.id, updatedDoc);
+  // Actualizamos el estado local
+  setDocument(updatedDoc);
+};
 
   if (!document) return <div className="p-6 text-gray-500 dark:text-gray-400">Cargando documento...</div>;
 

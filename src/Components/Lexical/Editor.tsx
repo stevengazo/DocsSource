@@ -16,6 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
+import InitContentPlugin from './plugins/InitContentPlugin'
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
 import theme from './theme';
@@ -83,11 +84,7 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
     };
 
     // Actualizar documento
-    updateDocument({
-      ...content,
-      content: newRootNode,
-      updatedAt: new Date(),
-    });
+    updateDocument(newRootNode);
   };
 
   const handleImageUpload = async (files: File[], editor: import('lexical').LexicalEditor) => {
