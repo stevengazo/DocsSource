@@ -1,13 +1,12 @@
-// plugins/ImagePlugin.ts
-import { createCommand, type LexicalCommand, type LexicalEditor,  } from 'lexical';
+import { createCommand, type LexicalCommand, type LexicalEditor, $getRoot, $insertNodes } from 'lexical';
 import { useEffect, type JSX } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { DecoratorNode } from 'lexical';
 
-// 1️⃣ Comando para insertar imagen
+/* ---------- Comando para insertar imagen ---------- */
 export const INSERT_IMAGE_COMMAND: LexicalCommand<{ src: string }> = createCommand();
 
-// 2️⃣ Nodo de imagen
+/* ---------- Nodo de imagen ---------- */
 export class ImageNode extends DecoratorNode<JSX.Element> {
   __src: string;
 
@@ -54,7 +53,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-// 3️⃣ Hook Plugin para registrar el comando
+/* ---------- Plugin para registrar comando ---------- */
 export default function ImagePlugin(): null {
   const [editor] = useLexicalComposerContext();
 
@@ -74,6 +73,11 @@ export default function ImagePlugin(): null {
   return null;
 }
 
-function $insertNodeToNearestRoot(editor: LexicalEditor, imageNode: ImageNode) {
-    throw new Error('Function not implemented.');
+/* ---------- Función auxiliar para insertar nodo ---------- */
+function $insertNodeToNearestRoot(editor: LexicalEditor, node: ImageNode) {
+  editor.update(() => {
+    const root = $getRoot();
+    $insertNodes([node]);
+    node.selectNext();
+  });
 }
