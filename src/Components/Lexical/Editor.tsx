@@ -16,7 +16,8 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 import { mediaFileReader } from '@lexical/utils';
-import ImagePlugin, { INSERT_IMAGE_COMMAND,  } from './plugins/ImagePlugin';
+
+import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND,  } from './plugins/ImagePlugin';
 
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
@@ -41,13 +42,11 @@ export default function Editor(): JSX.Element {
       ListNode,
       ListItemNode,
       LinkNode,
+      ImageNode,
       AutoLinkNode,
     ],
   }), []);
 
-  useEffect(() => {
-    console.log('Editor JSON actualizado:', editorJSON);
-  }, [editorJSON]);
 
   const onChange = (state: import('lexical').EditorState): void => {
     const json = state.toJSON();
