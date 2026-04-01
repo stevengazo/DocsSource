@@ -15,6 +15,7 @@ import { mediaFileReader } from '@lexical/utils';
 import { DividerNode } from './plugins/DividerNode';
 import { useTheme } from '../../context/ThemeContext';
 import { useTabs } from '../../hooks/useTabs';
+import TableOfContents from './TableOfContents';
 
 import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
@@ -135,32 +136,7 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
     </div>
   );
 
-  // Render de tabla de contenido
-  const renderTableOfContents = () => (
-    <div className={`w-64 border-l ${borderClass} p-4 overflow-y-auto ${bgClass}`}>
-      <h3 className="font-semibold mb-2">Tabla de Contenido</h3>
-      <ol className="list-decimal list-inside space-y-1">
-        {headings.map((h, idx) => {
-          const level = Math.min(Math.max(h.level, 1), 6);
-          return (
-            <li key={idx} className={`ml-${(level - 1) * 4}`}>
-              <a
-                href={`#${h.id}`}
-                className="text-sm hover:underline"
-                onClick={e => {
-                  e.preventDefault();
-                  const el = document.getElementById(h.id);
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                {h.text}
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-  );
+ 
 
   return (
     <div className="h-full flex flex-col">
@@ -202,7 +178,7 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
             </LexicalComposer>
           </div>
 
-          {activeTab === 'editor' && renderTableOfContents()}
+          {activeTab === 'editor' && <TableOfContents headings={headings} theme={appTheme} />}
         </div>
       </div>
     </div>
