@@ -1,24 +1,18 @@
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { motion } from 'framer-motion';
-
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import {
-  LexicalComposer,
-  type InitialConfigType,
-} from '@lexical/react/LexicalComposer';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
-
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
+import { DividerNode } from './plugins/DividerNode';
 import { mediaFileReader } from '@lexical/utils';
 
-import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND,  } from './plugins/ImagePlugin';
-
+import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
@@ -28,13 +22,14 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-export default function Editor(): JSX.Element {
+// Hook para manejar estado y lógica del editor
+function useEditorState() {
   const [editorJSON, setEditorJSON] = useState<string>('');
   const [tab, setTab] = useState<'editor' | 'debug'>('editor');
 
-  const initialConfig: InitialConfigType = useMemo(() => ({
+  const initialConfig = useMemo(() => ({
     namespace: 'MyEditor',
-    theme: theme,
+    theme,
     onError,
     nodes: [
       HeadingNode,
@@ -44,11 +39,11 @@ export default function Editor(): JSX.Element {
       LinkNode,
       ImageNode,
       AutoLinkNode,
+      DividerNode
     ],
   }), []);
 
-
-  const onChange = (state: import('lexical').EditorState): void => {
+  const onChange = (state: import('lexical').EditorState) => {
     const json = state.toJSON();
     setEditorJSON(JSON.stringify(json));
   };
@@ -59,6 +54,12 @@ export default function Editor(): JSX.Element {
       editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: file.result });
     });
   };
+
+  return { editorJSON, tab, setTab, initialConfig, onChange, handleImageUpload };
+}
+
+export default function Editor(): JSX.Element {
+  const { editorJSON, tab, setTab, initialConfig, onChange, handleImageUpload } = useEditorState();
 
   return (
     <div className="h-full flex flex-col bg-gray-50 p-4">
@@ -123,8 +124,7 @@ export default function Editor(): JSX.Element {
           {/* Plugins */}
           <HistoryPlugin />
           <ListPlugin />
-          <ImagePlugin/>
-          <AutoFocusPlugin />
+          <ImagePlugin />
           <MyOnChangePlugin onChange={onChange} />
 
         </LexicalComposer>

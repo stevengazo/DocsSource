@@ -29,9 +29,9 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { INSERT_IMAGE_COMMAND } from '../plugins/ImagePlugin';
+import { $createDividerNode, $isDividerNode } from '../plugins/DividerNode';
 
-/* ---------- UI ---------- */
-
+/* ---------- UI Components ---------- */
 function Group({ title, children }: any) {
   return (
     <div className="flex flex-col items-center px-2 border-r last:border-r-0">
@@ -68,8 +68,7 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
   );
 }
 
-/* ---------- MAIN COMPONENT ---------- */
-
+/* ---------- ToolbarPlugin Component ---------- */
 export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (files: FileList | null) => void }) {
   const [editor] = useLexicalComposerContext();
 
@@ -98,15 +97,11 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
           ? anchorNode
           : anchorNode.getTopLevelElementOrThrow();
 
-      if ($isHeadingNode(element)) {
-        setBlockType(element.getTag());
-      } else if ($isListNode(element)) {
-        setBlockType(element.getListType());
-      } else if ($isQuoteNode(element)) {
-        setBlockType('quote');
-      } else {
-        setBlockType('paragraph');
-      }
+      if ($isHeadingNode(element)) setBlockType(element.getTag());
+      else if ($isListNode(element)) setBlockType(element.getListType());
+      else if ($isQuoteNode(element)) setBlockType('quote');
+      else if ($isDividerNode(element)) setBlockType('divider');
+      else setBlockType('paragraph');
     }
   }, []);
 
@@ -154,6 +149,13 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
         case 'quote':
           newNode = $createQuoteNode();
           break;
+        case 'divider':
+          newNode = $createDividerNode();
+          const paragraph = $createParagraphNode();
+          element.replace(newNode);
+          newNode.insertAfter(paragraph);
+          paragraph.selectStart();
+          return;
         case 'bullet':
           editor.dispatchCommand(REMOVE_LIST_COMMAND, undefined);
           editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
@@ -218,10 +220,9 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
         <Btn active={blockType === 'paragraph'} onClick={() => setBlock('paragraph')} tooltip="Paragraph">P</Btn>
         <Btn active={blockType === 'h1'} onClick={() => setBlock('h1')} tooltip="Heading 1">H1</Btn>
         <Btn active={blockType === 'h2'} onClick={() => setBlock('h2')} tooltip="Heading 2">H2</Btn>
-
+        <Btn active={blockType === 'divider'} onClick={() => setBlock('divider')} tooltip="Divider">—</Btn>
         <Btn onClick={() => setBlock('bullet')} tooltip="Bullet List">•</Btn>
         <Btn onClick={() => setBlock('number')} tooltip="Numbered List">1.</Btn>
-
         <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')} tooltip="Left">⬅</Btn>
         <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')} tooltip="Center">↔</Btn>
         <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')} tooltip="Right">➡</Btn>
