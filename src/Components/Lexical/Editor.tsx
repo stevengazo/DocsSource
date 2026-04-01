@@ -70,8 +70,8 @@ export default function Editor(): JSX.Element {
     isActive ? (appTheme === 'dark' ? 'text-white' : 'text-gray-900') : (appTheme === 'dark' ? 'text-gray-300' : 'text-gray-500');
 
   return (
-    <div className={`h-full flex flex-col p-4 ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
-      <div className={`max-w-3xl w-full mx-auto rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass}`}>
+    <div className={`h-full flex flex-col `}>
+      <div className={`  rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass}`}>
 
         {/* Tabs */}
         <div className={`flex border-b ${borderClass} relative ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
