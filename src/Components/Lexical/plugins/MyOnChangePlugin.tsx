@@ -24,8 +24,6 @@ export default function MyOnChangePlugin({
         // JSON estructurado (para guardar en DB)
         const json = editorState.toJSON();
 
-        console.log("📝 Texto:", text);
-        console.log("📦 JSON:", json);
       });
 
       // Callback opcional hacia el padre

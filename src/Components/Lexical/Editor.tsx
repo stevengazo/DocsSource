@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import { motion } from 'framer-motion';
 
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
@@ -10,6 +10,12 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+
+// ✅ NODOS
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { ListNode, ListItemNode } from '@lexical/list';
+import { LinkNode, AutoLinkNode } from '@lexical/link';
 
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
@@ -24,11 +30,20 @@ export default function Editor(): JSX.Element {
   const [editorJSON, setEditorJSON] = useState<string>('');
   const [tab, setTab] = useState<'editor' | 'debug'>('editor');
 
-  const initialConfig: InitialConfigType = {
+  // ✅ IMPORTANTE: memo para evitar bugs de registro
+  const initialConfig: InitialConfigType = useMemo(() => ({
     namespace: 'MyEditor',
     theme: theme,
     onError,
-  };
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      LinkNode,
+      AutoLinkNode,
+    ],
+  }), []);
 
   useEffect(() => {
     console.log('Editor JSON actualizado:', editorJSON);
@@ -43,7 +58,7 @@ export default function Editor(): JSX.Element {
   return (
     <div className="h-full flex flex-col bg-gray-50 p-4">
       <div className="max-w-3xl w-full mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        
+
         {/* Tabs */}
         <div className="flex border-b border-gray-200 bg-gray-50 relative">
           {['editor', 'debug'].map((t) => {
@@ -56,9 +71,8 @@ export default function Editor(): JSX.Element {
                 className="relative px-4 py-2 text-sm font-medium"
               >
                 <span
-                  className={`relative z-10 ${
-                    isActive ? 'text-gray-900' : 'text-gray-500'
-                  }`}
+                  className={`relative z-10 ${isActive ? 'text-gray-900' : 'text-gray-500'
+                    }`}
                 >
                   {t === 'editor' ? 'Editor' : 'Debug'}
                 </span>
@@ -76,15 +90,15 @@ export default function Editor(): JSX.Element {
         </div>
 
         <LexicalComposer initialConfig={initialConfig}>
-          
-          {/* Toolbar solo en editor */}
+
+          {/* Toolbar */}
           {tab === 'editor' && (
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
               <ToolbarPlugin />
             </div>
           )}
 
-          {/* Contenido */}
+          {/* Content */}
           <div className="p-4 min-h-[250px]">
             {tab === 'editor' ? (
               <RichTextPlugin
@@ -108,8 +122,10 @@ export default function Editor(): JSX.Element {
 
           {/* Plugins */}
           <HistoryPlugin />
+          <ListPlugin />
           <AutoFocusPlugin />
           <MyOnChangePlugin onChange={onChange} />
+
         </LexicalComposer>
       </div>
     </div>
