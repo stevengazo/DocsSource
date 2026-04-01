@@ -1,31 +1,37 @@
-import { useState } from 'react';
+// src/pages/EditorPage.tsx
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Editor from './../Components/Lexical/Editor';
-
-interface DocumentData {
-  title: string;
-  description: string;
-  author: string;
-  creation: string;
-  currentVersion: string;
-  tags: string[];
-}
+import { useDocumentsContext } from '../context/DocumentsContext';
+import  type { Document } from '../types/Document';
+import { useParams } from 'react-router-dom';
 
 export default function EditorPage() {
-  const [document, setDocument] = useState<DocumentData>({
-    title: '',
-    description: '',
-    author: '',
-    creation: '',
-    currentVersion: '',
-    tags: [],
-  });
-
+  const { id } = useParams<{ id: string }>();
+  console.log(id)
+  const { updateDocument, getDocument } = useDocumentsContext();
+  const [document, setDocument] = useState<Document | undefined>();
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    console.log(id)
+    const doc = getDocument(id);
+    console.log(doc)
+    if (doc) setDocument(doc);
+  }, [id]);
+
+  // Función para actualizar tanto el estado local como el contexto
+  const handleUpdateDocument = (updatedContent: any) => {
+    if (!document) return;
+    const updatedDoc = { ...document, content: updatedContent, updatedAt: new Date() };
+    setDocument(updatedDoc);
+    updateDocument( document.id, updatedDoc);
+  };
+
+  if (!document) return <div className="p-6 text-gray-500 dark:text-gray-400">Cargando documento...</div>;
 
   return (
     <div className="min-h-screen flex flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      
       {/* Información del Documento animada */}
       <motion.div
         className="px-4 py-6 border-r border-gray-200 dark:border-gray-700"
@@ -80,29 +86,19 @@ export default function EditorPage() {
                 <label className="block text-sm font-medium mb-1">Fecha de creación</label>
                 <input
                   type="date"
-                  value={document.creation}
-                  onChange={(e) => setDocument({ ...document, creation: e.target.value })}
+                  value={new Date(document.createdAt).toISOString().substring(0, 10)}
+                  onChange={(e) => setDocument({ ...document, createdAt: new Date(e.target.value)})}
                   className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Versión actual</label>
+                <label className="block text-sm font-medium mb-1">ID / Versión</label>
                 <input
                   type="text"
-                  value={document.currentVersion}
-                  onChange={(e) => setDocument({ ...document, currentVersion: e.target.value })}
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Tags (separados por coma)</label>
-                <input
-                  type="text"
-                  value={document.tags.join(', ')}
-                  onChange={(e) => setDocument({ ...document, tags: e.target.value.split(',').map(t => t.trim()) })}
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                  value={document.id}
+                  readOnly
+                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
                 />
               </div>
             </div>
@@ -129,9 +125,10 @@ export default function EditorPage() {
         </div>
 
         <div className="border rounded p-2 mb-2 bg-white dark:bg-gray-800">
-          <h3 className="text-lg font-semibold">Documento</h3>
+          <h3 className="text-lg font-semibold">Editor</h3>
         </div>
-        <Editor />
+
+        <Editor document={document.content} updateDocument={handleUpdateDocument} />
       </motion.div>
     </div>
   );

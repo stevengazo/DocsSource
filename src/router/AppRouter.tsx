@@ -13,8 +13,8 @@ export default function AppRouter() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/editor" element={<EditorPage />} />
-                    <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/editor/:id" element={<EditorPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
         </Route>
 
         {/* fallback */}

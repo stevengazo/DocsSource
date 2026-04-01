@@ -1,75 +1,80 @@
+// src/hooks/useDocuments.ts
 import { useEffect, useState } from 'react';
+import type { Document } from '../types/Document';
+import type { RootNode } from '../types/DocumentNodes';
 
-const STORAGE_KEY = 'editor-documents';
+const STORAGE_KEY = 'my-documents';
+
+// Generador simple de IDs únicos
+const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export function useDocuments() {
-  const [docs, setDocs] = useState<Record<string, any>>({});
-  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
-  // Load inicial desde localStorage
+  // Cargar desde localStorage al iniciar
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored);
-      setDocs(parsed);
-      const first = Object.keys(parsed)[0];
-      if (first) setCurrentId(first);
+      try {
+        const parsed: Document[] = JSON.parse(stored);
+        setDocuments(parsed);
+      } catch {
+        setDocuments([]);
+      }
     }
   }, []);
 
-  // Persistencia automática en localStorage
+  // Guardar en localStorage cada vez que cambian los documentos
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
-    console.log('Documentos guardados:', docs); // ✅ imprime en consola cada cambio
-  }, [docs]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
+  }, [documents]);
 
-  // Crear documento y devolverlo
-  const createDoc = (title = 'Nuevo documento', content: any = null) => {
-    const id = crypto.randomUUID();
-
-    const newDoc = {
-      id,
+  // Crear un nuevo documento
+  const addDocument = (title: string, description = '', content?: RootNode) => {
+    const newDoc: Document = {
+      id: generateId(),
       title,
-      content,
-      updatedAt: Date.now(),
+      description,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      author: 'Unknown',
+      content: content || {
+        type: 'root',
+        version: 1,
+        format: '',
+        indent: 0,
+        direction: null,
+        children: [],
+      },
     };
-
-    setDocs((prev) => ({ ...prev, [id]: newDoc }));
-    setCurrentId(id);
-
+    setDocuments((docs) => [...docs, newDoc]);
     return newDoc;
   };
 
-  const deleteDoc = (id: string) => {
-    const copy = { ...docs };
-    delete copy[id];
-
-    setDocs(copy);
-
-    if (currentId === id) {
-      const next = Object.keys(copy)[0] || null;
-      setCurrentId(next);
-    }
+  // Actualizar documento
+  const updateDocument = (id: string, updates: Partial<Omit<Document, 'createdAt' | 'id'>>) => {
+    setDocuments((docs) =>
+      docs.map((doc) =>
+        doc.id === id
+          ? { ...doc, ...updates, updatedAt: new Date()}
+          : doc
+      )
+    );
   };
 
-  const updateDoc = (id: string, data: any) => {
-    setDocs((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        ...data,
-        updatedAt: Date.now(),
-      },
-    }));
+  // Eliminar documento
+  const deleteDocument = (id: string) => {
+    setDocuments((docs) => docs.filter((doc) => doc.id !== id));
   };
+
+  // Obtener documento por id
+  const getDocument = (id: string) => documents.find((doc) => doc.id === id);
 
   return {
-    docs,
-    currentId,
-    currentDoc: currentId ? docs[currentId] : null,
-    setCurrentId,
-    createDoc,
-    deleteDoc,
-    updateDoc,
+    documents,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    getDocument,
   };
 }

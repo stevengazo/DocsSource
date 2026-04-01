@@ -1,5 +1,5 @@
 // src/Components/Lexical/Editor.tsx
-import { useMemo, useState, useEffect, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { motion } from 'framer-motion';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -19,15 +19,21 @@ import ToolbarPlugin from './plugins/ToolbarPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
 import theme from './theme';
-import { $getRoot, $getSelection, $isRangeSelection } from 'lexical';
+import { $getRoot } from 'lexical';
+
+interface EditorProps {
+  document: any;
+  updateDocument: (doc: any) => void;
+}
 
 function onError(error: Error): void {
   console.error(error);
 }
 
-// Hook para manejar estado y lógica del editor
-function useEditorState() {
-  const [editorJSON, setEditorJSON] = useState<string>('');
+export default function Editor({ document, updateDocument }: EditorProps): JSX.Element {
+  const { theme: appTheme } = useTheme();
+
+  const [editorJSON, setEditorJSON] = useState<string>(JSON.stringify(document.content || {}));
   const [tab, setTab] = useState<'editor' | 'debug'>('editor');
   const [headings, setHeadings] = useState<{ text: string; level: number; id: string }[]>([]);
 
@@ -51,22 +57,21 @@ function useEditorState() {
     const json = editorState.toJSON();
     setEditorJSON(JSON.stringify(json));
 
-    // Extraer encabezados para tabla de contenido
     editor.update(() => {
       const root = $getRoot();
-      const sel = $getSelection();
       const newHeadings: { text: string; level: number; id: string }[] = [];
-
       root.getChildren().forEach(node => {
         if (node instanceof HeadingNode) {
           const text = node.getTextContent();
-          const level = node.getTag(); // h1, h2, h3 ...
-          newHeadings.push({ text, level: parseInt(level.replace('h', '')), id: text.toLowerCase().replace(/\s+/g, '-') });
+          const level = parseInt(node.getTag().replace('h', ''), 10);
+          newHeadings.push({ text, level, id: text.toLowerCase().replace(/\s+/g, '-') });
         }
       });
-
       setHeadings(newHeadings);
     });
+
+    // Actualizar documento
+    updateDocument({ ...document, content: json, updatedAt: new Date() });
   };
 
   const handleImageUpload = async (files: File[], editor: import('lexical').LexicalEditor) => {
@@ -76,25 +81,16 @@ function useEditorState() {
     });
   };
 
-  return { editorJSON, tab, setTab, initialConfig, onChange, handleImageUpload, headings };
-}
-
-export default function Editor(): JSX.Element {
-  const { editorJSON, tab, setTab, initialConfig, onChange, handleImageUpload, headings } = useEditorState();
-  const { theme: appTheme } = useTheme(); // Dark / Light mode
-
   const bgClass = appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800';
   const borderClass = appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
   const tabText = (isActive: boolean) =>
     isActive ? (appTheme === 'dark' ? 'text-white' : 'text-gray-900') : (appTheme === 'dark' ? 'text-gray-300' : 'text-gray-500');
 
   return (
-    <div className={`h-full flex flex-col`}>
+    <div className="h-full flex flex-col">
       <div className={`flex rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass} flex-1`}>
-
-        {/* Editor + Tabla de Contenido */}
         <div className="flex-1 flex relative">
-          {/* Editor Principal */}
+          {/* Editor principal */}
           <div className="flex-1 flex flex-col">
             {/* Tabs */}
             <div className={`flex border-b ${borderClass} relative ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
@@ -122,14 +118,12 @@ export default function Editor(): JSX.Element {
             </div>
 
             <LexicalComposer initialConfig={initialConfig}>
-              {/* Toolbar */}
               {tab === 'editor' && (
                 <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
                   <ToolbarPlugin onUploadImages={handleImageUpload} />
                 </div>
               )}
 
-              {/* Content */}
               <div className="p-4 min-h-[250px] flex-1 overflow-y-auto">
                 {tab === 'editor' ? (
                   <RichTextPlugin
@@ -150,7 +144,6 @@ export default function Editor(): JSX.Element {
                   <DebugPanel data={editorJSON} />
                 )}
 
-                {/* Plugins */}
                 <HistoryPlugin />
                 <ListPlugin />
                 <ImagePlugin />
@@ -159,13 +152,12 @@ export default function Editor(): JSX.Element {
             </LexicalComposer>
           </div>
 
-          {/* Panel lateral derecho - Tabla de Contenido */}
+          {/* Panel lateral derecho - Tabla de contenido */}
           {tab === 'editor' && (
             <div className={`w-64 border-l ${borderClass} p-4 overflow-y-auto ${bgClass}`}>
               <h3 className="font-semibold mb-2">Tabla de Contenido</h3>
               <ol className="list-decimal list-inside space-y-1">
                 {headings.map((h, idx) => {
-                  // Aseguramos que level esté entre 1 y 6
                   const level = Math.min(Math.max(h.level, 1), 6);
                   return (
                     <li key={idx} className={`ml-${(level - 1) * 4}`}>
