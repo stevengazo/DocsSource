@@ -56,8 +56,8 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
           ${disabled
             ? 'opacity-40 cursor-not-allowed'
             : active
-            ? 'bg-gray-200 text-black dark:bg-gray-700 dark:text-white'
-            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}
+              ? 'bg-gray-200 text-black dark:bg-gray-700 dark:text-white'
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}
         `}
       >
         {children}
@@ -142,6 +142,9 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
         case 'h1':
         case 'h2':
         case 'h3':
+        case 'h4':
+        case 'h5':
+        case 'h6':
           newNode = $createHeadingNode(type);
           break;
         case 'quote':
@@ -215,9 +218,20 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
 
         {/* Párrafo */}
         <Group title="Párrafo">
-          <Btn active={blockType === 'paragraph'} onClick={() => setBlock('paragraph')} tooltip="Paragraph">P</Btn>
-          <Btn active={blockType === 'h1'} onClick={() => setBlock('h1')} tooltip="Heading 1">H1</Btn>
-          <Btn active={blockType === 'h2'} onClick={() => setBlock('h2')} tooltip="Heading 2">H2</Btn>
+       <select
+            value={blockType}
+            onChange={(e) => setBlock(e.target.value)}
+            className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            title="Seleccionar Heading"
+          >
+            <option value="paragraph">Párrafo</option>
+            <option value="h1">Heading 1</option>
+            <option value="h2">Heading 2</option>
+            <option value="h3">Heading 3</option>
+            <option value="h4">Heading 4</option>
+            <option value="h5">Heading 5</option>
+            <option value="h6">Heading 6</option>
+          </select>
           <Btn active={blockType === 'divider'} onClick={() => setBlock('divider')} tooltip="Divider">—</Btn>
           <Btn onClick={() => setBlock('bullet')} tooltip="Bullet List">•</Btn>
           <Btn onClick={() => setBlock('number')} tooltip="Numbered List">1.</Btn>

@@ -164,21 +164,25 @@ export default function Editor(): JSX.Element {
             <div className={`w-64 border-l ${borderClass} p-4 overflow-y-auto ${bgClass}`}>
               <h3 className="font-semibold mb-2">Tabla de Contenido</h3>
               <ol className="list-decimal list-inside space-y-1">
-                {headings.map((h, idx) => (
-                  <li key={idx} className={`ml-${(h.level - 1) * 4}`}>
-                    <a
-                      href={`#${h.id}`}
-                      className="text-sm hover:underline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        const el = document.getElementById(h.id);
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                    >
-                      {h.text}
-                    </a>
-                  </li>
-                ))}
+                {headings.map((h, idx) => {
+                  // Aseguramos que level esté entre 1 y 6
+                  const level = Math.min(Math.max(h.level, 1), 6);
+                  return (
+                    <li key={idx} className={`ml-${(level - 1) * 4}`}>
+                      <a
+                        href={`#${h.id}`}
+                        className="text-sm hover:underline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const el = document.getElementById(h.id);
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                      >
+                        {h.text}
+                      </a>
+                    </li>
+                  );
+                })}
               </ol>
             </div>
           )}
