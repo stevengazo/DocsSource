@@ -5,6 +5,7 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import EditorPage from "../pages/EditorPage";
 import NotFound from "../pages/NotFound";
+import DocumentsPage from "../pages/DocumentsPage";
 
 export default function AppRouter() {
   return (
@@ -13,6 +14,7 @@ export default function AppRouter() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/editor" element={<EditorPage />} />
+                    <Route path="/documents" element={<DocumentsPage />} />
         </Route>
 
         {/* fallback */}

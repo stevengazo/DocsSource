@@ -13,15 +13,14 @@ export default function MainLayout() {
     return (
       <Link to={path} className="relative px-3 py-1.5 text-sm">
         <span
-          className={`relative z-10 ${
-            active
+          className={`relative z-10 ${active
               ? theme === "dark"
                 ? "text-gray-900"
                 : "text-white"
               : theme === "dark"
-              ? "text-gray-300"
-              : "text-gray-600"
-          }`}
+                ? "text-gray-300"
+                : "text-gray-600"
+            }`}
         >
           {label}
         </span>
@@ -30,9 +29,8 @@ export default function MainLayout() {
         {active && (
           <motion.div
             layoutId="nav-pill"
-            className={`absolute inset-0 rounded-md ${
-              theme === "dark" ? "bg-gray-200" : "bg-gray-900"
-            }`}
+            className={`absolute inset-0 rounded-md ${theme === "dark" ? "bg-gray-200" : "bg-gray-900"
+              }`}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
@@ -42,7 +40,7 @@ export default function MainLayout() {
 
   return (
     <div className={`${theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"} min-h-screen flex flex-col`}>
-      
+
       {/* Top Bar */}
       <motion.header
         initial={{ y: -40, opacity: 0 }}
@@ -58,6 +56,7 @@ export default function MainLayout() {
 
           <nav className="flex items-center gap-2">
             {navItem("/", "Inicio")}
+            {navItem("/documents", "Documentos")}
             {navItem("/editor", "Editor")}
           </nav>
         </div>
