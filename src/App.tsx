@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import Editor from './Components/Lexical/Editor'
+import AppRouter from './router/AppRouter'
 
 function App() {
 
   return (
     <>
+<AppRouter />
 
-      <Editor />
     </>
   )
 }
