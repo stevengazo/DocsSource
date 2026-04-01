@@ -30,13 +30,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { INSERT_IMAGE_COMMAND } from '../plugins/ImagePlugin';
 import { $createDividerNode, $isDividerNode } from '../plugins/DividerNode';
+import { useTheme } from '../../../context/ThemeContext';
 
 /* ---------- UI Components ---------- */
 function Group({ title, children }: any) {
   return (
     <div className="flex flex-col items-center px-2 border-r last:border-r-0">
       <div className="flex items-center gap-1">{children}</div>
-      <span className="text-[10px] text-gray-400 mt-1">{title}</span>
+      <span className="text-[10px] text-gray-400 dark:text-gray-300 mt-1">{title}</span>
     </div>
   );
 }
@@ -55,13 +56,13 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
           ${disabled
             ? 'opacity-40 cursor-not-allowed'
             : active
-            ? 'bg-gray-200 text-black'
-            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}
+            ? 'bg-gray-200 text-black dark:bg-gray-700 dark:text-white'
+            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}
         `}
       >
         {children}
       </motion.button>
-      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs bg-black text-white px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs bg-black text-white dark:bg-white dark:text-black px-2 py-1 rounded whitespace-nowrap pointer-events-none">
         {tooltip}
       </div>
     </div>
@@ -71,18 +72,16 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
 /* ---------- ToolbarPlugin Component ---------- */
 export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (files: FileList | null) => void }) {
   const [editor] = useLexicalComposerContext();
+  const { theme: appTheme } = useTheme(); // 'light' | 'dark'
 
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
-
   const [blockType, setBlockType] = useState('paragraph');
 
-  /* ---------- Toolbar update ---------- */
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if ($isRangeSelection(selection)) {
@@ -123,7 +122,6 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
     );
   }, [editor, $updateToolbar]);
 
-  /* ---------- Set Block Type ---------- */
   const setBlock = (type: string) => {
     editor.update(() => {
       const selection = $getSelection();
@@ -177,7 +175,6 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
     });
   };
 
-  /* ---------- Upload Images ---------- */
   const handleUploadImage = useCallback(
     (files: FileList | null) => {
       if (!files) return;
@@ -196,56 +193,53 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex gap-2 p-2 border-b bg-white shadow-sm sticky top-0 z-10"
-    >
-      {/* Clipboard */}
-      <Group title="Clipboard">
-        <Btn disabled={!canUndo} onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} tooltip="Undo">↶</Btn>
-        <Btn disabled={!canRedo} onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)} tooltip="Redo">↷</Btn>
-      </Group>
+    <div className={appTheme === 'dark' ? 'dark' : ''}>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex gap-2 p-2 border-b bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-10"
+      >
+        {/* Clipboard */}
+        <Group title="Clipboard">
+          <Btn disabled={!canUndo} onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} tooltip="Undo">↶</Btn>
+          <Btn disabled={!canRedo} onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)} tooltip="Redo">↷</Btn>
+        </Group>
 
-      {/* Fuente */}
-      <Group title="Fuente">
-        <Btn active={isBold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')} tooltip="Bold"><b>B</b></Btn>
-        <Btn active={isItalic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')} tooltip="Italic"><i>I</i></Btn>
-        <Btn active={isUnderline} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')} tooltip="Underline"><u>U</u></Btn>
-        <Btn active={isStrikethrough} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')} tooltip="Strike"><s>S</s></Btn>
-      </Group>
+        {/* Fuente */}
+        <Group title="Fuente">
+          <Btn active={isBold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')} tooltip="Bold"><b>B</b></Btn>
+          <Btn active={isItalic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')} tooltip="Italic"><i>I</i></Btn>
+          <Btn active={isUnderline} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')} tooltip="Underline"><u>U</u></Btn>
+          <Btn active={isStrikethrough} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')} tooltip="Strike"><s>S</s></Btn>
+        </Group>
 
-      {/* Párrafo */}
-      <Group title="Párrafo">
-        <Btn active={blockType === 'paragraph'} onClick={() => setBlock('paragraph')} tooltip="Paragraph">P</Btn>
-        <Btn active={blockType === 'h1'} onClick={() => setBlock('h1')} tooltip="Heading 1">H1</Btn>
-        <Btn active={blockType === 'h2'} onClick={() => setBlock('h2')} tooltip="Heading 2">H2</Btn>
-        <Btn active={blockType === 'divider'} onClick={() => setBlock('divider')} tooltip="Divider">—</Btn>
-        <Btn onClick={() => setBlock('bullet')} tooltip="Bullet List">•</Btn>
-        <Btn onClick={() => setBlock('number')} tooltip="Numbered List">1.</Btn>
-        <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')} tooltip="Left">⬅</Btn>
-        <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')} tooltip="Center">↔</Btn>
-        <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')} tooltip="Right">➡</Btn>
-        <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')} tooltip="Justify">☰</Btn>
-      </Group>
+        {/* Párrafo */}
+        <Group title="Párrafo">
+          <Btn active={blockType === 'paragraph'} onClick={() => setBlock('paragraph')} tooltip="Paragraph">P</Btn>
+          <Btn active={blockType === 'h1'} onClick={() => setBlock('h1')} tooltip="Heading 1">H1</Btn>
+          <Btn active={blockType === 'h2'} onClick={() => setBlock('h2')} tooltip="Heading 2">H2</Btn>
+          <Btn active={blockType === 'divider'} onClick={() => setBlock('divider')} tooltip="Divider">—</Btn>
+          <Btn onClick={() => setBlock('bullet')} tooltip="Bullet List">•</Btn>
+          <Btn onClick={() => setBlock('number')} tooltip="Numbered List">1.</Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')} tooltip="Left">⬅</Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')} tooltip="Center">↔</Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')} tooltip="Right">➡</Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')} tooltip="Justify">☰</Btn>
+        </Group>
 
-      {/* Imagen */}
-      <Group title="Imagen">
-        <Btn
-          tooltip="Insert Image"
-          onClick={() => document.getElementById('image-upload')?.click()}
-        >
-          🖼️
-        </Btn>
-        <input
-          id="image-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={(e) => handleUploadImage(e.target.files)}
-          className="hidden"
-        />
-      </Group>
-    </motion.div>
+        {/* Imagen */}
+        <Group title="Imagen">
+          <Btn tooltip="Insert Image" onClick={() => document.getElementById('image-upload')?.click()}>🖼️</Btn>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => handleUploadImage(e.target.files)}
+            className="hidden"
+          />
+        </Group>
+      </motion.div>
+    </div>
   );
 }

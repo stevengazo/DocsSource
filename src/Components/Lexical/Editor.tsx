@@ -1,3 +1,4 @@
+// src/Components/Lexical/Editor.tsx
 import { useMemo, useState, type JSX } from 'react';
 import { motion } from 'framer-motion';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -11,6 +12,7 @@ import { ListNode, ListItemNode } from '@lexical/list';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 import { DividerNode } from './plugins/DividerNode';
 import { mediaFileReader } from '@lexical/utils';
+import { useTheme } from '../../context/ThemeContext';
 
 import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
@@ -39,7 +41,7 @@ function useEditorState() {
       LinkNode,
       ImageNode,
       AutoLinkNode,
-      DividerNode
+      DividerNode,
     ],
   }), []);
 
@@ -60,13 +62,19 @@ function useEditorState() {
 
 export default function Editor(): JSX.Element {
   const { editorJSON, tab, setTab, initialConfig, onChange, handleImageUpload } = useEditorState();
+  const { theme: appTheme } = useTheme(); // Dark / Light mode
+
+  const bgClass = appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800';
+  const borderClass = appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
+  const tabText = (isActive: boolean) =>
+    isActive ? (appTheme === 'dark' ? 'text-white' : 'text-gray-900') : (appTheme === 'dark' ? 'text-gray-300' : 'text-gray-500');
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 p-4">
-      <div className="max-w-3xl w-full mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className={`h-full flex flex-col p-4 ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      <div className={`max-w-3xl w-full mx-auto rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass}`}>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-gray-50 relative">
+        <div className={`flex border-b ${borderClass} relative ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
           {['editor', 'debug'].map((t) => {
             const isActive = tab === t;
             return (
@@ -75,13 +83,13 @@ export default function Editor(): JSX.Element {
                 onClick={() => setTab(t as 'editor' | 'debug')}
                 className="relative px-4 py-2 text-sm font-medium"
               >
-                <span className={`relative z-10 ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                <span className={`relative z-10 ${tabText(isActive)}`}>
                   {t === 'editor' ? 'Editor' : 'Debug'}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="tab-indicator"
-                    className="absolute inset-0 bg-white border-x border-t border-gray-200 rounded-t-lg"
+                    className={`absolute inset-0 rounded-t-lg ${appTheme === 'dark' ? 'bg-gray-700 border-x border-t border-gray-600' : 'bg-white border-x border-t border-gray-200'}`}
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
@@ -91,10 +99,9 @@ export default function Editor(): JSX.Element {
         </div>
 
         <LexicalComposer initialConfig={initialConfig}>
-
           {/* Toolbar */}
           {tab === 'editor' && (
-            <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+            <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
               <ToolbarPlugin onUploadImages={handleImageUpload} />
             </div>
           )}
@@ -105,10 +112,10 @@ export default function Editor(): JSX.Element {
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
-                    className="min-h-[200px] outline-none text-sm leading-relaxed text-gray-800"
+                    className={`min-h-[200px] outline-none text-sm leading-relaxed ${appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'}`}
                     aria-placeholder="Ingrese algún texto..."
                     placeholder={
-                      <div className="text-gray-400 pointer-events-none">
+                      <div className={`${appTheme === 'dark' ? 'text-gray-400' : 'text-gray-400'} pointer-events-none`}>
                         Empieza a escribir algo...
                       </div>
                     }
@@ -126,7 +133,6 @@ export default function Editor(): JSX.Element {
           <ListPlugin />
           <ImagePlugin />
           <MyOnChangePlugin onChange={onChange} />
-
         </LexicalComposer>
       </div>
     </div>

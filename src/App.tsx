@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import AppRouter from './router/AppRouter'
+import { ThemeProvider } from './context/ThemeContext'
 
 function App() {
 
   return (
     <>
-<AppRouter />
-
+      <ThemeProvider>
+        <AppRouter />
+      </ThemeProvider>
     </>
   )
 }
