@@ -11,35 +11,31 @@ import {
     REDO_COMMAND,
     SELECTION_CHANGE_COMMAND,
     UNDO_COMMAND,
+    $isElementNode,
 } from 'lexical';
-
 import {
     $createHeadingNode,
     $isHeadingNode,
     $createQuoteNode,
     $isQuoteNode,
 } from '@lexical/rich-text';
-
 import { $createParagraphNode } from 'lexical';
-
 import {
     INSERT_UNORDERED_LIST_COMMAND,
     INSERT_ORDERED_LIST_COMMAND,
     REMOVE_LIST_COMMAND,
     $isListNode,
 } from '@lexical/list';
-
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { INSERT_IMAGE_COMMAND } from '../plugins/ImagePlugin'; // nuestro plugin de imagen
 
 /* ---------- UI ---------- */
 
 function Group({ title, children }: any) {
     return (
         <div className="flex flex-col items-center px-2 border-r last:border-r-0">
-            <div className="flex items-center gap-1">
-                {children}
-            </div>
+            <div className="flex items-center gap-1">{children}</div>
             <span className="text-[10px] text-gray-400 mt-1">{title}</span>
         </div>
     );
@@ -59,13 +55,12 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
                     ${disabled
                         ? 'opacity-40 cursor-not-allowed'
                         : active
-                            ? 'bg-gray-200 text-black'
-                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}
+                        ? 'bg-gray-200 text-black'
+                        : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}
                 `}
             >
                 {children}
             </motion.button>
-
             <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs bg-black text-white px-2 py-1 rounded whitespace-nowrap pointer-events-none">
                 {tooltip}
             </div>
@@ -73,7 +68,7 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
     );
 }
 
-/* ---------- MAIN ---------- */
+/* ---------- MAIN COMPONENT ---------- */
 
 export default function ToolbarPlugin() {
     const [editor] = useLexicalComposerContext();
@@ -88,9 +83,9 @@ export default function ToolbarPlugin() {
 
     const [blockType, setBlockType] = useState('paragraph');
 
+    /* ---------- Toolbar update ---------- */
     const $updateToolbar = useCallback(() => {
         const selection = $getSelection();
-
         if ($isRangeSelection(selection)) {
             setIsBold(selection.hasFormat('bold'));
             setIsItalic(selection.hasFormat('italic'));
@@ -133,6 +128,7 @@ export default function ToolbarPlugin() {
         );
     }, [editor, $updateToolbar]);
 
+    /* ---------- Set Block Type ---------- */
     const setBlock = (type: string) => {
         editor.update(() => {
             const selection = $getSelection();
@@ -172,11 +168,31 @@ export default function ToolbarPlugin() {
 
             if (!newNode) return;
 
-            newNode.append(...element.getChildren());
+            if ($isElementNode(element)) {
+                newNode.append(...element.getChildren());
+            }
             element.replace(newNode);
             newNode.selectStart();
         });
     };
+
+    /* ---------- Upload Images ---------- */
+    const handleUploadImage = useCallback(
+        (files: FileList | null) => {
+            if (!files) return;
+            Array.from(files).forEach((file) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const src = event.target?.result;
+                    if (typeof src === 'string') {
+                        editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src });
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        },
+        [editor]
+    );
 
     return (
         <motion.div
@@ -184,7 +200,6 @@ export default function ToolbarPlugin() {
             animate={{ opacity: 1, y: 0 }}
             className="flex gap-2 p-2 border-b bg-white shadow-sm sticky top-0 z-10"
         >
-
             {/* Clipboard */}
             <Group title="Clipboard">
                 <Btn disabled={!canUndo} onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} tooltip="Undo">↶</Btn>
@@ -214,6 +229,31 @@ export default function ToolbarPlugin() {
                 <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')} tooltip="Justify">☰</Btn>
             </Group>
 
+            {/* Imagen */}
+            <Group title="Imagen">
+                <div className="relative group">
+                    <label htmlFor="image-upload">
+                        <motion.button
+                            whileHover={{ scale: 1.08 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-2 py-1 rounded text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                        >
+                            🖼️
+                        </motion.button>
+                    </label>
+                    <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleUploadImage(e.target.files)}
+                        className="hidden"
+                    />
+                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs bg-black text-white px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                        Insert Image
+                    </div>
+                </div>
+            </Group>
         </motion.div>
     );
 }
