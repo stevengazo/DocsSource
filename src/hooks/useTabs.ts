@@ -5,7 +5,7 @@ export type TabKey = string;
 
 interface UseTabsProps<T extends TabKey> {
   initialTab: T;
-  tabs: T[];
+  tabs: readonly T[];
 }
 
 export function useTabs<T extends TabKey>({ initialTab, tabs }: UseTabsProps<T>) {
