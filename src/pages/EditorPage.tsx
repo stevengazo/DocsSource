@@ -1,16 +1,17 @@
-// src/pages/EditorPage.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Editor from '../Components/Editor/Editor';
 import type { Document } from '../types/Document';
 import type { RootNode } from '../types/DocumentNodes';
 import DocumentInfo from '../Components/Documents/DocumentInfo';
+import { useTheme } from '../context/ThemeContext';
 
 export default function EditorPage() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const [collapsed, setCollapsed] = useState(false);
 
-  // Documento mock/local (sin carga externa)
   const [document, setDocument] = useState<Document>({
     id: 'local-doc',
     title: '',
@@ -21,22 +22,27 @@ export default function EditorPage() {
     updatedAt: new Date(),
   });
 
-  // Solo actualiza estado local (sin contexto)
   const handleUpdateDocument = (updatedContent: RootNode) => {
-    const updatedDoc = {
+    setDocument({
       ...document,
       content: updatedContent,
       updatedAt: new Date(),
-    };
-
-    setDocument(updatedDoc);
+    });
   };
 
   return (
-    <div className=" h-screen-85 flex flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Información del Documento animada */}
+    <div
+      className={`
+        h-screen-85 flex flex-row
+        ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}
+      `}
+    >
+      {/* Panel lateral */}
       <motion.div
-        className="px-4 py-6 border-r border-gray-200 dark:border-gray-700"
+        className={`
+          px-4 py-6 border-r
+          ${isDark ? 'border-gray-700' : 'border-gray-200'}
+        `}
         animate={{ width: collapsed ? 0 : '30%' }}
         initial={{ width: '30%' }}
         transition={{ duration: 0.4 }}
@@ -44,21 +50,29 @@ export default function EditorPage() {
         {!collapsed && (
           <>
             <div className="flex justify-between items-center mb-4">
-              <h1 className="text-3xl font-bold">Información del Documento</h1>
+              <h1 className="text-3xl font-bold">
+                Información del Documento
+              </h1>
+
               <button
                 onClick={() => setCollapsed(true)}
-                className="text-sm px-2 py-1 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                className={`
+                  text-sm px-2 py-1 rounded transition
+                  ${isDark
+                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}
+                `}
               >
                 Ocultar
               </button>
             </div>
-            <DocumentInfo doc={document} />
 
+            <DocumentInfo doc={document} />
           </>
         )}
       </motion.div>
 
-      {/* Contenido del Editor animado */}
+      {/* Editor */}
       <motion.div
         className="flex flex-col justify-center px-4 py-6 gap-4"
         animate={{
@@ -72,14 +86,19 @@ export default function EditorPage() {
           {collapsed && (
             <button
               onClick={() => setCollapsed(false)}
-              className="text-sm px-2 py-1 rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+              className={`
+                text-sm px-2 py-1 rounded transition
+                ${isDark
+                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}
+              `}
             >
               Mostrar información
             </button>
           )}
-        </div> 
+        </div>
 
-        <Editor  />
+        <Editor />
       </motion.div>
     </div>
   );
