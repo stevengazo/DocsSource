@@ -8,8 +8,6 @@ type DebugPanelProps = {
 export function DebugPanel({ data }: DebugPanelProps) {
   const { theme } = useTheme();
 
-  console.log("DebugPanel renderizado con data:", data);
-
   const formatted = useMemo(() => {
     try {
       return JSON.stringify(JSON.parse(data), null, 2);
@@ -24,16 +22,18 @@ export function DebugPanel({ data }: DebugPanelProps) {
 
   return (
     <div
-      className={`mt-4 h-full border rounded-lg shadow-sm ${
+      className={`w-full h-full flex flex-col  overflow-hidden ${
         theme === "dark"
-          ? "bg-gray-800 border-gray-700"
-          : "bg-white border-gray-200"
+          ? "border-gray-700 bg-gray-900"
+          : "border-gray-200 bg-white"
       }`}
     >
       {/* Header */}
       <div
-        className={`flex items-center justify-between px-3 py-2 border-b ${
-          theme === "dark" ? "border-gray-700 bg-gray-900" : "border-gray-100 bg-gray-50"
+        className={`flex items-center justify-between w-full px-3 py-2 border-b ${
+          theme === "dark"
+            ? "border-gray-700 bg-gray-900"
+            : "border-gray-100 bg-gray-50"
         }`}
       >
         <span
@@ -57,9 +57,9 @@ export function DebugPanel({ data }: DebugPanelProps) {
       </div>
 
       {/* Content */}
-      <div className=" h-fit overflow-auto">
+      <div className="flex-1 overflow-auto">
         <pre
-          className={`text-xs p-3 font-mono leading-relaxed ${
+          className={`text-xs p-3 font-mono leading-relaxed whitespace-pre-wrap break-words ${
             theme === "dark" ? "text-gray-100" : "text-gray-800"
           }`}
         >

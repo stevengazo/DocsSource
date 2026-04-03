@@ -33,7 +33,7 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className=" h-screen-85 flex flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Información del Documento animada */}
       <motion.div
         className="px-4 py-6 border-r border-gray-200 dark:border-gray-700"

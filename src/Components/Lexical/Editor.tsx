@@ -32,7 +32,7 @@ function onError(error: Error): void {
   console.error(error);
 }
 
-/* ---------- Contenido interno (IMPORTANTE) ---------- */
+/* ---------- Contenido interno ---------- */
 function EditorContent({
   activeTab,
   appTheme,
@@ -44,19 +44,19 @@ function EditorContent({
   const { handleImageUpload } = useImageUpload();
 
   return (
-    <>
+    <div className="flex flex-col flex-1 overflow-hidden">
       {activeTab === 'editor' && (
         <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
           <ToolbarPlugin onUploadImages={handleImageUpload} />
         </div>
       )}
 
-      <div className="p-4 min-h-[250px] flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-auto p-4">
         {activeTab === 'editor' ? (
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className={`min-h-[200px] outline-none text-sm leading-relaxed ${
+                className={`min-h-[200px] w-full outline-none text-sm leading-relaxed ${
                   appTheme === 'dark'
                     ? 'text-gray-100'
                     : 'text-gray-800'
@@ -72,7 +72,9 @@ function EditorContent({
             ErrorBoundary={LexicalErrorBoundary}
           />
         ) : (
-          <DebugPanel data={editorJSON} />
+          <div className="h-full">
+            <DebugPanel data={editorJSON} />
+          </div>
         )}
 
         <HistoryPlugin />
@@ -80,7 +82,7 @@ function EditorContent({
         <ImagePlugin />
         <MyOnChangePlugin onChange={onChange} />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -134,7 +136,6 @@ export default function Editor(): JSX.Element {
 
     setEditorJSON(serialized);
 
-    // 🔹 Extraer headings
     editor.update(() => {
       const root = $getRoot();
       const newHeadings: { text: string; level: number; id: string }[] = [];
@@ -206,12 +207,12 @@ export default function Editor(): JSX.Element {
   );
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full flex flex-col">
       <div
         className={`flex rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass} flex-1`}
       >
-        <div className="flex-1 flex relative">
-          <div className="flex-1 flex flex-col">
+        <div className="flex flex-1 relative overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {renderTabs()}
 
             <LexicalComposer initialConfig={initialConfig}>
