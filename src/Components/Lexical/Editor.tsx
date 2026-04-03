@@ -8,6 +8,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
@@ -26,10 +27,40 @@ import { DebugPanel } from '../DebugPanel';
 
 import theme from './theme';
 import { $getRoot } from 'lexical';
+import { useEffect } from 'react';
+
+/* ---------- Config ---------- */
+const LOCAL_STORAGE_KEY = 'lexical-editor-content';
 
 /* ---------- Error Handler ---------- */
 function onError(error: Error): void {
   console.error(error);
+}
+
+/* ---------- Plugin: Load desde localStorage ---------- */
+function LoadFromLocalStoragePlugin() {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!saved) return;
+
+      const parsedJSON = JSON.parse(saved);
+
+      if (!parsedJSON.root) {
+        console.warn('Estado inválido en localStorage');
+        return;
+      }
+
+      const editorState = editor.parseEditorState(saved);
+      editor.setEditorState(editorState);
+    } catch (error) {
+      console.error('Error cargando editor:', error);
+    }
+  }, [editor]);
+
+  return null;
 }
 
 /* ---------- Contenido interno ---------- */
@@ -80,6 +111,7 @@ function EditorContent({
         <HistoryPlugin />
         <ListPlugin />
         <ImagePlugin />
+        <LoadFromLocalStoragePlugin /> {/* ✅ carga correcta */}
         <MyOnChangePlugin onChange={onChange} />
       </div>
     </div>
@@ -90,15 +122,12 @@ function EditorContent({
 export default function Editor(): JSX.Element {
   const { theme: appTheme } = useTheme();
 
-  const [editorJSON, setEditorJSON] = useState<string>(
-    JSON.stringify({})
-  );
+  const [editorJSON, setEditorJSON] = useState<string>('');
+  const lastValue = useRef<string>('');
 
   const [headings, setHeadings] = useState<
     { text: string; level: number; id: string }[]
   >([]);
-
-  const lastValue = useRef<string>('');
 
   const { activeTab, selectTab, getTabTextClass } = useTabs({
     initialTab: 'editor',
@@ -135,6 +164,13 @@ export default function Editor(): JSX.Element {
     lastValue.current = serialized;
 
     setEditorJSON(serialized);
+
+    /* ---------- Guardar en localStorage ---------- */
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, serialized);
+    } catch (error) {
+      console.error('Error guardando en localStorage:', error);
+    }
 
     editor.update(() => {
       const root = $getRoot();
