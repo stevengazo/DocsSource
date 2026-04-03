@@ -99,9 +99,10 @@ function EditorContent({
       <div className="flex-1 overflow-auto p-4">
         {activeTab === 'editor' && (
           <RichTextPlugin
+      
             contentEditable={
               <ContentEditable
-                className={`min-h-[200px] w-full outline-none text-sm leading-relaxed ${appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+                className={` border shadow-2xl border-gray-200 px-3 min-h-[200px] w-full outline-none text-sm leading-relaxed ${appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
                   }`}
                 aria-placeholder="Ingrese algún texto..."
                 placeholder={
