@@ -1,5 +1,9 @@
 // src/types/DocumentNodes.ts
 
+import { LexicalNode } from "lexical";
+
+
+
 // Tipos de nodos
 export type NodeType =
   | "root"

@@ -22,38 +22,27 @@ import { useTabs } from '../../hooks/useTabs';
 import TableOfContents from './TableOfContents';
 
 import ToolbarPlugin from './plugins/ToolbarPlugin';
-import InitContentPlugin from './plugins/InitContentPlugin';
 import MyOnChangePlugin from './plugins/MyOnChangePlugin';
 import { DebugPanel } from '../DebugPanel';
 
 import theme from './theme';
 import { $getRoot } from 'lexical';
-import type { RootNode } from '../../types/DocumentNodes';
-
-interface EditorProps {
-  content: any;
-  updateDocument: (doc: any) => void;
-}
 
 function onError(error: Error): void {
-  // console.error(error);
+   console.error(error);
 }
 
-export default function Editor({ content, updateDocument }: EditorProps): JSX.Element {
+export default function Editor(): JSX.Element {
   const { theme: appTheme } = useTheme();
 
-  // 🔒 Congelar contenido inicial (evita reinicializaciones)
-  const initialContentRef = useRef(content);
-
   const [editorJSON, setEditorJSON] = useState<string>(
-    JSON.stringify(content || {})
+    JSON.stringify( {})
   );
 
   const [headings, setHeadings] = useState<
     { text: string; level: number; id: string }[]
   >([]);
 
-  // 🔒 Evitar loops de actualización
   const lastValue = useRef<string>('');
 
   const { activeTab, selectTab, getTabTextClass } = useTabs({
@@ -114,17 +103,6 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
       setHeadings(newHeadings);
     });
 
-    // Documento compatible
-    const newRootNode: RootNode = {
-      type: 'root',
-      version: 1,
-      children: serializedObj.root?.children || [],
-      format: '',
-      indent: 0,
-      direction: null,
-    };
-
-    updateDocument(newRootNode);
   };
 
   const handleImageUpload = async (
@@ -164,7 +142,7 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
             className="relative px-4 py-2 text-sm font-medium"
           >
             <span
-              className={`relative z-10 ${getTabTextClass(t, appTheme)}`}
+              className={`relative z-10 ${getTabTextClass(t as 'editor' | 'debug', appTheme)}`}
             >
               {t === 'editor' ? 'Editor' : 'Debug'}
             </span>
@@ -196,10 +174,7 @@ export default function Editor({ content, updateDocument }: EditorProps): JSX.El
             {renderTabs()}
 
             <LexicalComposer initialConfig={initialConfig}>
-              {/* 🔒 Solo usa el contenido congelado */}
-              <InitContentPlugin
-                initialContent={initialContentRef.current}
-              />
+      
 
               {activeTab === 'editor' && (
                 <div

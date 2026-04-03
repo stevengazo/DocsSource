@@ -79,7 +79,7 @@ export default function EditorPage() {
           )}
         </div> 
 
-        <Editor content={document.content} updateDocument={handleUpdateDocument} />
+        <Editor  />
       </motion.div>
     </div>
   );
