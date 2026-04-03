@@ -10,6 +10,12 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
+import {
+  TableNode,
+  TableRowNode,
+  TableCellNode,
+} from '@lexical/table';
 
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
@@ -95,9 +101,8 @@ function EditorContent({
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className={`min-h-[200px] w-full outline-none text-sm leading-relaxed ${
-                  appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
-                }`}
+                className={`min-h-[200px] w-full outline-none text-sm leading-relaxed ${appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+                  }`}
                 aria-placeholder="Ingrese algún texto..."
                 placeholder={
                   <div className="text-gray-400 pointer-events-none">
@@ -120,6 +125,7 @@ function EditorContent({
         <ListPlugin />
         <ImagePlugin />
         <LoadFromLocalStoragePlugin />
+        <TablePlugin/>
         <MyOnChangePlugin onChange={onChange} />
       </div>
     </div>
@@ -160,6 +166,10 @@ export default function Editor(): JSX.Element {
         AutoLinkNode,
         DividerNode,
         ImageNode,
+
+        TableNode,
+        TableRowNode,
+        TableCellNode,
       ],
     }),
     []
@@ -216,9 +226,8 @@ export default function Editor(): JSX.Element {
 
   const renderTabs = () => (
     <div
-      className={`flex border-b ${borderClass} relative ${
-        appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
-      }`}
+      className={`flex border-b ${borderClass} relative ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
+        }`}
     >
       {tabs.map((t) => {
         const isActive = activeTab === t;
@@ -227,8 +236,8 @@ export default function Editor(): JSX.Element {
           t === 'editor'
             ? 'Editor'
             : t === 'debug'
-            ? 'Debug'
-            : 'Preview';
+              ? 'Debug'
+              : 'Preview';
 
         return (
           <button
@@ -245,11 +254,10 @@ export default function Editor(): JSX.Element {
             {isActive && (
               <motion.div
                 layoutId="tab-indicator"
-                className={`absolute inset-0 rounded-t-lg ${
-                  appTheme === 'dark'
+                className={`absolute inset-0 rounded-t-lg ${appTheme === 'dark'
                     ? 'bg-gray-700 border-x border-t border-gray-600'
                     : 'bg-white border-x border-t border-gray-200'
-                }`}
+                  }`}
               />
             )}
           </button>
