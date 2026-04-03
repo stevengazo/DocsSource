@@ -1,17 +1,5 @@
 // src/Components/Lexical/Editor.tsx
 
-/**
- * Editor enriquecido basado en Lexical.
- * 
- * Features principales:
- * - Edición de texto enriquecido (headings, listas, links, imágenes, divider)
- * - Persistencia automática en localStorage
- * - Tabla de contenidos dinámica (basada en headings)
- * - Panel de debug con JSON del editor
- * - Soporte de temas (dark/light)
- * - Tabs (Editor / Debug)
- */
-
 import { useMemo, useState, useRef, type JSX } from 'react';
 import { motion } from 'framer-motion';
 
@@ -42,33 +30,13 @@ import theme from '../../utils/theme';
 import { $getRoot } from 'lexical';
 import { useEffect } from 'react';
 
-/* ---------- Configuración ---------- */
-
-/**
- * Clave utilizada para persistir el estado del editor en localStorage
- */
 const LOCAL_STORAGE_KEY = 'lexical-editor-content';
 
-/* ---------- Error Handler ---------- */
-
-/**
- * Manejo global de errores del editor
- */
 function onError(error: Error): void {
   console.error(error);
 }
 
-/* ---------- Plugin: Cargar desde localStorage ---------- */
-
-/**
- * Plugin encargado de hidratar el editor desde localStorage al montar.
- * 
- * Flujo:
- * 1. Obtiene JSON guardado
- * 2. Valida estructura básica
- * 3. Reconstruye EditorState
- * 4. Lo inyecta en el editor
- */
+/* ---------- Load Plugin ---------- */
 function LoadFromLocalStoragePlugin() {
   const [editor] = useLexicalComposerContext();
 
@@ -77,15 +45,16 @@ function LoadFromLocalStoragePlugin() {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (!saved) return;
 
-      const parsedJSON = JSON.parse(saved);
-
-      if (!parsedJSON.root) {
-        console.warn('Estado inválido en localStorage');
-        return;
-      }
+      const parsed = JSON.parse(saved);
+      if (!parsed?.root) return;
 
       const editorState = editor.parseEditorState(saved);
-      editor.setEditorState(editorState);
+
+      // ✅ Mover fuera del ciclo de render actual
+      queueMicrotask(() => {
+        editor.setEditorState(editorState);
+      });
+
     } catch (error) {
       console.error('Error cargando editor:', error);
     }
@@ -94,17 +63,8 @@ function LoadFromLocalStoragePlugin() {
   return null;
 }
 
-/* ---------- Contenido interno del editor ---------- */
+/* ---------- Editor Content ---------- */
 
-/**
- * Renderiza el contenido principal del editor dependiendo del tab activo.
- * 
- * Responsabilidades:
- * - Toolbar (solo en tab editor)
- * - Área editable
- * - Plugins de Lexical
- * - Panel debug
- */
 function EditorContent({
   activeTab,
   appTheme,
@@ -113,14 +73,10 @@ function EditorContent({
   onChange,
   editorJSON,
 }: any) {
-  /**
-   * Hook custom para manejo de subida de imágenes
-   */
   const { handleImageUpload } = useImageUpload();
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      {/* Toolbar */}
       {activeTab === 'editor' && (
         <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
           <ToolbarPlugin onUploadImages={handleImageUpload} />
@@ -128,15 +84,12 @@ function EditorContent({
       )}
 
       <div className="flex-1 overflow-auto p-4">
-        {/* Editor vs Debug */}
         {activeTab === 'editor' ? (
           <RichTextPlugin
             contentEditable={
               <ContentEditable
                 className={`min-h-[200px] w-full outline-none text-sm leading-relaxed ${
-                  appTheme === 'dark'
-                    ? 'text-gray-100'
-                    : 'text-gray-800'
+                  appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
                 }`}
                 aria-placeholder="Ingrese algún texto..."
                 placeholder={
@@ -154,7 +107,6 @@ function EditorContent({
           </div>
         )}
 
-        {/* Plugins */}
         <HistoryPlugin />
         <ListPlugin />
         <ImagePlugin />
@@ -165,42 +117,24 @@ function EditorContent({
   );
 }
 
-/* ---------- Componente principal ---------- */
+/* ---------- MAIN ---------- */
 
 export default function Editor(): JSX.Element {
-  /**
-   * Tema global (dark / light)
-   */
   const { theme: appTheme } = useTheme();
 
-  /**
-   * Estado serializado del editor (JSON)
-   */
   const [editorJSON, setEditorJSON] = useState<string>('');
-
-  /**
-   * Cache del último valor serializado para evitar renders innecesarios
-   */
   const lastValue = useRef<string>('');
+  const lastHeadings = useRef<string>('');
 
-  /**
-   * Headings detectados para tabla de contenidos
-   */
   const [headings, setHeadings] = useState<
     { text: string; level: number; id: string }[]
   >([]);
 
-  /**
-   * Manejo de tabs (Editor / Debug)
-   */
   const { activeTab, selectTab, getTabTextClass } = useTabs({
     initialTab: 'editor',
     tabs: ['editor', 'debug'],
   });
 
-  /**
-   * Configuración inicial de Lexical
-   */
   const initialConfig = useMemo(
     () => ({
       namespace: 'MyEditor',
@@ -220,38 +154,26 @@ export default function Editor(): JSX.Element {
     []
   );
 
-  /**
-   * Handler principal de cambios del editor
-   * 
-   * Responsabilidades:
-   * - Serializar estado
-   * - Persistir en localStorage
-   * - Detectar headings dinámicamente
-   */
-  const onChange = (
-    editorState: import('lexical').EditorState,
-    editor: import('lexical').LexicalEditor
-  ) => {
+  /* ---------- FIX AQUÍ ---------- */
+  const onChange = (editorState: any, editor: any) => {
     const serializedObj = editorState.toJSON();
     const serialized = JSON.stringify(serializedObj);
 
-    // Evita procesamiento redundante
     if (serialized === lastValue.current) return;
     lastValue.current = serialized;
 
     setEditorJSON(serialized);
 
-    /* ---------- Persistencia ---------- */
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, serialized);
     } catch (error) {
-      console.error('Error guardando en localStorage:', error);
+      console.error('Error guardando:', error);
     }
 
-    /* ---------- Extracción de headings ---------- */
-    editor.update(() => {
+    /* ✅ USAR read en lugar de update */
+    editorState.read(() => {
       const root = $getRoot();
-      const newHeadings: { text: string; level: number; id: string }[] = [];
+      const newHeadings: any[] = [];
 
       root.getChildren().forEach((node) => {
         if (node instanceof HeadingNode) {
@@ -266,11 +188,14 @@ export default function Editor(): JSX.Element {
         }
       });
 
-      setHeadings(newHeadings);
+      const serializedHeadings = JSON.stringify(newHeadings);
+
+      if (serializedHeadings !== lastHeadings.current) {
+        lastHeadings.current = serializedHeadings;
+        setHeadings(newHeadings);
+      }
     });
   };
-
-  /* ---------- Clases dinámicas ---------- */
 
   const bgClass =
     appTheme === 'dark'
@@ -280,9 +205,6 @@ export default function Editor(): JSX.Element {
   const borderClass =
     appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
-  /**
-   * Render de tabs con animación (framer-motion)
-   */
   const renderTabs = () => (
     <div
       className={`flex border-b ${borderClass} relative ${
@@ -315,7 +237,6 @@ export default function Editor(): JSX.Element {
                     ? 'bg-gray-700 border-x border-t border-gray-600'
                     : 'bg-white border-x border-t border-gray-200'
                 }`}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               />
             )}
           </button>
@@ -323,8 +244,6 @@ export default function Editor(): JSX.Element {
       })}
     </div>
   );
-
-  /* ---------- Render ---------- */
 
   return (
     <div className="h-full w-full flex flex-col">
@@ -347,7 +266,6 @@ export default function Editor(): JSX.Element {
             </LexicalComposer>
           </div>
 
-          {/* Tabla de contenidos (solo en modo editor) */}
           {activeTab === 'editor' && (
             <TableOfContents headings={headings} theme={appTheme} />
           )}
