@@ -5,6 +5,14 @@ import type { Document } from '../types/Document';
 import type { RootNode } from '../types/DocumentNodes';
 import DocumentInfo from '../Components/Documents/DocumentInfo';
 import { useTheme } from '../context/ThemeContext';
+import DocumentHistory from '../Components/Documents/DocumentHistory';
+
+const mockVersions = [
+  { id: "1", updatedAt: new Date(), author: "Steven", comment: "Versión inicial", content: {} },
+  { id: "2", updatedAt: new Date(), author: "Steven", comment: "Agregado sección de resumen", content: {} },
+  { id: "3", updatedAt: new Date(), author: "Steven", comment: "Corrección de typos", content: {} },
+];
+
 
 export default function EditorPage() {
   const { theme } = useTheme();
@@ -67,7 +75,18 @@ export default function EditorPage() {
               </button>
             </div>
 
-            <DocumentInfo doc={document} />
+            <div>
+              <DocumentInfo doc={document} />
+
+              <DocumentHistory
+                versions={mockVersions}
+                onViewVersion={(v) => console.log("Ver:", v)}
+                onRestoreVersion={(v) => console.log("Restaurar:", v)}
+              />
+
+            </div>
+
+
           </>
         )}
       </motion.div>

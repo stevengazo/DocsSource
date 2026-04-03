@@ -1,5 +1,5 @@
 // src/contexts/ThemeContext.tsx
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
 type Theme = "light" | "dark";
 
@@ -11,8 +11,23 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
+const LOCAL_STORAGE_KEY = "app-theme";
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light"); // blanco por defecto
+
+  // Cargar el tema de localStorage al montar
+  useEffect(() => {
+    const storedTheme = localStorage.getItem(LOCAL_STORAGE_KEY) as Theme | null;
+    if (storedTheme) {
+      setThemeState(storedTheme);
+    }
+  }, []);
+
+  // Guardar tema en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));

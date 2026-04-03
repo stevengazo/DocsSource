@@ -2,35 +2,46 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { Home, FileText, Users, Settings, User } from "lucide-react"; // Lucide icons
 
 export default function MainLayout() {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
+  const isDark = theme === "dark";
+
+  // Define los íconos para cada ruta
+  const iconsMap: Record<string, JSX.Element> = {
+    "/": <Home className="w-4 h-4 mr-1" />,
+    "/documents": <FileText className="w-4 h-4 mr-1" />,
+    "/departaments": <Users className="w-4 h-4 mr-1" />,
+    "/settings": <Settings className="w-4 h-4 mr-1" />,
+    "/my-profile": <User className="w-4 h-4 mr-1" />,
+  };
+
   const navItem = (path: string, label: string) => {
     const active = location.pathname === path;
 
+    const baseText = active
+      ? "text-white"
+      : isDark
+      ? "text-gray-300"
+      : "text-gray-600";
+
+    const bgColor = active
+      ? "bg-orange-500" // color activo rojo/naranja
+      : "bg-gray-200 dark:bg-gray-700"; // gris más suave cuando no está activo
+
     return (
-      <Link to={path} className="relative px-3 py-1.5 text-sm">
-        <span
-          className={`relative z-10 ${active
-            ? theme === "dark"
-              ? "text-gray-900"
-              : "text-white"
-            : theme === "dark"
-              ? "text-gray-300"
-              : "text-gray-600"
-            }`}
-        >
-          {label}
-        </span>
+      <Link to={path} className="relative px-3 py-1.5 text-sm rounded-md flex items-center">
+        {iconsMap[path]}
+        <span className={`relative z-10 ${baseText}`}>{label}</span>
 
         {/* Animated background */}
         {active && (
           <motion.div
             layoutId="nav-pill"
-            className={`absolute inset-0 rounded-md ${theme === "dark" ? "bg-gray-200" : "bg-gray-900"
-              }`}
+            className={`absolute inset-0 rounded-md ${bgColor}`}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
@@ -39,19 +50,19 @@ export default function MainLayout() {
   };
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"} min-h-screen flex flex-col`}>
+    <div className={`${isDark ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"} min-h-screen flex flex-col`}>
 
       {/* Top Bar */}
       <motion.header
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className={`${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} h-14 border-b flex items-center justify-between px-6 sticky top-0 z-20`}
+        className={`${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"} h-14 border-b flex items-center justify-between px-6 sticky top-0 z-20`}
       >
         {/* Left */}
         <div className="flex items-center gap-4">
-          <span className={`${theme === "dark" ? "text-gray-100" : "text-gray-800"} font-semibold`}>
-            Mi App
+          <span className={`${isDark ? "text-gray-100" : "text-gray-800"} font-semibold`}>
+            DocuDan
           </span>
 
           <nav className="flex items-center gap-2">
@@ -67,9 +78,9 @@ export default function MainLayout() {
         <div className="flex items-center gap-3">
           <button
             onClick={toggleTheme}
-            className="text-sm hover:text-blue-400 transition"
+            className="text-sm hover:text-orange-400 transition"
           >
-            {theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+            {isDark ? "Modo Claro" : "Modo Oscuro"}
           </button>
 
           <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-xs font-medium text-gray-700">
