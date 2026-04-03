@@ -1,4 +1,17 @@
 // src/Components/Lexical/Editor.tsx
+
+/**
+ * Editor enriquecido basado en Lexical.
+ * 
+ * Features principales:
+ * - Edición de texto enriquecido (headings, listas, links, imágenes, divider)
+ * - Persistencia automática en localStorage
+ * - Tabla de contenidos dinámica (basada en headings)
+ * - Panel de debug con JSON del editor
+ * - Soporte de temas (dark/light)
+ * - Tabs (Editor / Debug)
+ */
+
 import { useMemo, useState, useRef, type JSX } from 'react';
 import { motion } from 'framer-motion';
 
@@ -29,15 +42,33 @@ import theme from './theme';
 import { $getRoot } from 'lexical';
 import { useEffect } from 'react';
 
-/* ---------- Config ---------- */
+/* ---------- Configuración ---------- */
+
+/**
+ * Clave utilizada para persistir el estado del editor en localStorage
+ */
 const LOCAL_STORAGE_KEY = 'lexical-editor-content';
 
 /* ---------- Error Handler ---------- */
+
+/**
+ * Manejo global de errores del editor
+ */
 function onError(error: Error): void {
   console.error(error);
 }
 
-/* ---------- Plugin: Load desde localStorage ---------- */
+/* ---------- Plugin: Cargar desde localStorage ---------- */
+
+/**
+ * Plugin encargado de hidratar el editor desde localStorage al montar.
+ * 
+ * Flujo:
+ * 1. Obtiene JSON guardado
+ * 2. Valida estructura básica
+ * 3. Reconstruye EditorState
+ * 4. Lo inyecta en el editor
+ */
 function LoadFromLocalStoragePlugin() {
   const [editor] = useLexicalComposerContext();
 
@@ -63,7 +94,17 @@ function LoadFromLocalStoragePlugin() {
   return null;
 }
 
-/* ---------- Contenido interno ---------- */
+/* ---------- Contenido interno del editor ---------- */
+
+/**
+ * Renderiza el contenido principal del editor dependiendo del tab activo.
+ * 
+ * Responsabilidades:
+ * - Toolbar (solo en tab editor)
+ * - Área editable
+ * - Plugins de Lexical
+ * - Panel debug
+ */
 function EditorContent({
   activeTab,
   appTheme,
@@ -72,10 +113,14 @@ function EditorContent({
   onChange,
   editorJSON,
 }: any) {
+  /**
+   * Hook custom para manejo de subida de imágenes
+   */
   const { handleImageUpload } = useImageUpload();
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
+      {/* Toolbar */}
       {activeTab === 'editor' && (
         <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
           <ToolbarPlugin onUploadImages={handleImageUpload} />
@@ -83,6 +128,7 @@ function EditorContent({
       )}
 
       <div className="flex-1 overflow-auto p-4">
+        {/* Editor vs Debug */}
         {activeTab === 'editor' ? (
           <RichTextPlugin
             contentEditable={
@@ -108,32 +154,53 @@ function EditorContent({
           </div>
         )}
 
+        {/* Plugins */}
         <HistoryPlugin />
         <ListPlugin />
         <ImagePlugin />
-        <LoadFromLocalStoragePlugin /> {/* ✅ carga correcta */}
+        <LoadFromLocalStoragePlugin />
         <MyOnChangePlugin onChange={onChange} />
       </div>
     </div>
   );
 }
 
-/* ---------- Editor principal ---------- */
+/* ---------- Componente principal ---------- */
+
 export default function Editor(): JSX.Element {
+  /**
+   * Tema global (dark / light)
+   */
   const { theme: appTheme } = useTheme();
 
+  /**
+   * Estado serializado del editor (JSON)
+   */
   const [editorJSON, setEditorJSON] = useState<string>('');
+
+  /**
+   * Cache del último valor serializado para evitar renders innecesarios
+   */
   const lastValue = useRef<string>('');
 
+  /**
+   * Headings detectados para tabla de contenidos
+   */
   const [headings, setHeadings] = useState<
     { text: string; level: number; id: string }[]
   >([]);
 
+  /**
+   * Manejo de tabs (Editor / Debug)
+   */
   const { activeTab, selectTab, getTabTextClass } = useTabs({
     initialTab: 'editor',
     tabs: ['editor', 'debug'],
   });
 
+  /**
+   * Configuración inicial de Lexical
+   */
   const initialConfig = useMemo(
     () => ({
       namespace: 'MyEditor',
@@ -153,6 +220,14 @@ export default function Editor(): JSX.Element {
     []
   );
 
+  /**
+   * Handler principal de cambios del editor
+   * 
+   * Responsabilidades:
+   * - Serializar estado
+   * - Persistir en localStorage
+   * - Detectar headings dinámicamente
+   */
   const onChange = (
     editorState: import('lexical').EditorState,
     editor: import('lexical').LexicalEditor
@@ -160,18 +235,20 @@ export default function Editor(): JSX.Element {
     const serializedObj = editorState.toJSON();
     const serialized = JSON.stringify(serializedObj);
 
+    // Evita procesamiento redundante
     if (serialized === lastValue.current) return;
     lastValue.current = serialized;
 
     setEditorJSON(serialized);
 
-    /* ---------- Guardar en localStorage ---------- */
+    /* ---------- Persistencia ---------- */
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, serialized);
     } catch (error) {
       console.error('Error guardando en localStorage:', error);
     }
 
+    /* ---------- Extracción de headings ---------- */
     editor.update(() => {
       const root = $getRoot();
       const newHeadings: { text: string; level: number; id: string }[] = [];
@@ -193,6 +270,8 @@ export default function Editor(): JSX.Element {
     });
   };
 
+  /* ---------- Clases dinámicas ---------- */
+
   const bgClass =
     appTheme === 'dark'
       ? 'bg-gray-900 text-gray-100'
@@ -201,6 +280,9 @@ export default function Editor(): JSX.Element {
   const borderClass =
     appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
+  /**
+   * Render de tabs con animación (framer-motion)
+   */
   const renderTabs = () => (
     <div
       className={`flex border-b ${borderClass} relative ${
@@ -242,6 +324,8 @@ export default function Editor(): JSX.Element {
     </div>
   );
 
+  /* ---------- Render ---------- */
+
   return (
     <div className="h-full w-full flex flex-col">
       <div
@@ -263,6 +347,7 @@ export default function Editor(): JSX.Element {
             </LexicalComposer>
           </div>
 
+          {/* Tabla de contenidos (solo en modo editor) */}
           {activeTab === 'editor' && (
             <TableOfContents headings={headings} theme={appTheme} />
           )}
