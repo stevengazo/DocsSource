@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useTheme } from "../../src/context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 
 type DebugPanelProps = {
   data: string;

@@ -30,7 +30,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { INSERT_IMAGE_COMMAND } from '../plugins/ImagePlugin';
 import { $createDividerNode, $isDividerNode } from '../plugins/DividerNode';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 
 /* ---------- UI Components ---------- */
 function Group({ title, children }: any) {

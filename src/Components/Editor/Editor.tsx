@@ -27,18 +27,18 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
 
-import ImagePlugin, { ImageNode, useImageUpload } from './plugins/ImagePlugin';
-import { DividerNode } from './plugins/DividerNode';
+import ImagePlugin, { ImageNode, useImageUpload } from './../../plugins/ImagePlugin';
+import { DividerNode } from './../../plugins/DividerNode';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useTabs } from '../../hooks/useTabs';
 import TableOfContents from './TableOfContents';
 
-import ToolbarPlugin from './plugins/ToolbarPlugin';
-import MyOnChangePlugin from './plugins/MyOnChangePlugin';
-import { DebugPanel } from '../DebugPanel';
+import ToolbarPlugin from './../../plugins/ToolbarPlugin';
+import MyOnChangePlugin from './../../plugins/MyOnChangePlugin';
+import { DebugPanel } from './DebugPanel';
 
-import theme from './theme';
+import theme from '../../utils/theme';
 import { $getRoot } from 'lexical';
 import { useEffect } from 'react';
 

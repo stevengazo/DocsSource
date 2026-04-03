@@ -1,7 +1,7 @@
 // src/pages/EditorPage.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Editor from './../Components/Lexical/Editor';
+import Editor from '../Components/Editor/Editor';
 import type { Document } from '../types/Document';
 import type { RootNode } from '../types/DocumentNodes';
 import DocumentInfo from '../Components/Documents/DocumentInfo';
