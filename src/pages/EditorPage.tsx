@@ -1,57 +1,36 @@
 // src/pages/EditorPage.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Editor from './../Components/Lexical/Editor';
-import { useDocumentsContext } from '../context/DocumentsContext';
 import type { Document } from '../types/Document';
-import { useParams } from 'react-router-dom';
 import type { RootNode } from '../types/DocumentNodes';
+import DocumentInfo from '../Components/Documents/DocumentInfo';
 
 export default function EditorPage() {
-  const { id } = useParams<{ id: string }>();
 
-  const { updateDocument, getDocument } = useDocumentsContext();
-  const [document, setDocument] = useState<Document | undefined>();
   const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
-    const doc = getDocument(id);
+  // Documento mock/local (sin carga externa)
+  const [document, setDocument] = useState<Document>({
+    id: 'local-doc',
+    title: '',
+    author: '',
+    description: '',
+    content: {} as RootNode,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 
-    if (!doc) {
-      console.warn('EditorPage: Documento no encontrado para id', id);
-      return;
-    }
-
-    setDocument(doc);
-    console.log('EditorPage: document loaded', doc);
-  }, []);
-
-  // Función para actualizar tanto el estado local como el contexto
+  // Solo actualiza estado local (sin contexto)
   const handleUpdateDocument = (updatedContent: RootNode) => {
-    if (!document) {
-      console.warn('handleUpdateDocument: document is undefined');
-      return;
-    }
-
     const updatedDoc = {
       ...document,
-      content: updatedContent, // RootNode directo
+      content: updatedContent,
       updatedAt: new Date(),
     };
 
-    updateDocument(document.id, updatedDoc);
     setDocument(updatedDoc);
   };
-
-
-
-  // Mostrar loader si aún no hay documento
-  if (document == null || document == undefined)
-    return (
-      <div className="p-6 text-gray-500 dark:text-gray-400 text-center">
-        Cargando documento...
-      </div>
-    );
 
   return (
     <div className="min-h-screen flex flex-row bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -73,68 +52,8 @@ export default function EditorPage() {
                 Ocultar
               </button>
             </div>
+            <DocumentInfo doc={document} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Título</label>
-                <input
-                  type="text"
-                  value={document.title}
-                  onChange={(e) =>
-                    setDocument({ ...document, title: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Autor</label>
-                <input
-                  type="text"
-                  value={document.author}
-                  onChange={(e) =>
-                    setDocument({ ...document, author: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Descripción</label>
-                <textarea
-                  value={document.description}
-                  onChange={(e) =>
-                    setDocument({ ...document, description: e.target.value })
-                  }
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Fecha de creación</label>
-                <input
-                  type="date"
-                  value={new Date(document.createdAt)
-                    .toISOString()
-                    .substring(0, 10)}
-                  onChange={(e) =>
-                    setDocument({ ...document, createdAt: new Date(e.target.value) })
-                  }
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">ID / Versión</label>
-                <input
-                  type="text"
-                  value={document.id}
-                  readOnly
-                  className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                />
-              </div>
-            </div>
           </>
         )}
       </motion.div>
@@ -158,11 +77,7 @@ export default function EditorPage() {
               Mostrar información
             </button>
           )}
-        </div>
-
-        <div className="border rounded p-2 mb-2 bg-white dark:bg-gray-800">
-          <h3 className="text-lg font-semibold">Editor</h3>
-        </div>
+        </div> 
 
         <Editor content={document.content} updateDocument={handleUpdateDocument} />
       </motion.div>
