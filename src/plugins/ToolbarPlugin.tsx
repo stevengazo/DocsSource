@@ -34,43 +34,43 @@ import { $createDividerNode, $isDividerNode } from '../plugins/DividerNode';
 import { useTheme } from '../context/ThemeContext';
 import { INSERT_TABLE_COMMAND } from '@lexical/table';
 import TableDropdown from './../Components/Editor/Tabledropdown';
- 
+
 /* ─────────────────────────────────────────────────────────────────
    Constantes de estilos
 ───────────────────────────────────────────────────────────────── */
 const FONT_SIZES = [
   { label: 'XS', value: '12px', tooltip: 'Muy pequeño' },
-  { label: 'S',  value: '14px', tooltip: 'Pequeño' },
-  { label: 'M',  value: '16px', tooltip: 'Mediano' },
-  { label: 'L',  value: '20px', tooltip: 'Grande' },
+  { label: 'S', value: '14px', tooltip: 'Pequeño' },
+  { label: 'M', value: '16px', tooltip: 'Mediano' },
+  { label: 'L', value: '20px', tooltip: 'Grande' },
   { label: 'XL', value: '28px', tooltip: 'Muy grande' },
 ] as const;
- 
+
 const FONT_WEIGHTS = [
-  { label: 'L', value: '300', tooltip: 'Light',   fw: 300 },
+  { label: 'L', value: '300', tooltip: 'Light', fw: 300 },
   { label: 'R', value: '400', tooltip: 'Regular', fw: 400 },
-  { label: 'M', value: '500', tooltip: 'Medium',  fw: 500 },
-  { label: 'B', value: '700', tooltip: 'Bold',    fw: 700 },
+  { label: 'M', value: '500', tooltip: 'Medium', fw: 500 },
+  { label: 'B', value: '700', tooltip: 'Bold', fw: 700 },
 ] as const;
- 
+
 const COLORS = [
   { value: 'inherit', label: 'Por defecto', swatch: 'transparent', border: true },
-  { value: '#111827',  label: 'Negro',       swatch: '#111827' },
-  { value: '#6B7280',  label: 'Gris',        swatch: '#6B7280' },
-  { value: '#D1D5DB',  label: 'Gris claro',  swatch: '#D1D5DB', border: true },
-  { value: '#ffffff',  label: 'Blanco',       swatch: '#ffffff', border: true },
-  { value: '#EF4444',  label: 'Rojo',         swatch: '#EF4444' },
-  { value: '#F97316',  label: 'Naranja',      swatch: '#F97316' },
-  { value: '#F59E0B',  label: 'Ámbar',        swatch: '#F59E0B' },
-  { value: '#EAB308',  label: 'Amarillo',     swatch: '#EAB308' },
-  { value: '#EC4899',  label: 'Rosa',         swatch: '#EC4899' },
-  { value: '#22C55E',  label: 'Verde',        swatch: '#22C55E' },
-  { value: '#14B8A6',  label: 'Teal',         swatch: '#14B8A6' },
-  { value: '#3B82F6',  label: 'Azul',         swatch: '#3B82F6' },
-  { value: '#6366F1',  label: 'Índigo',       swatch: '#6366F1' },
-  { value: '#8B5CF6',  label: 'Violeta',      swatch: '#8B5CF6' },
+  { value: '#111827', label: 'Negro', swatch: '#111827' },
+  { value: '#6B7280', label: 'Gris', swatch: '#6B7280' },
+  { value: '#D1D5DB', label: 'Gris claro', swatch: '#D1D5DB', border: true },
+  { value: '#ffffff', label: 'Blanco', swatch: '#ffffff', border: true },
+  { value: '#EF4444', label: 'Rojo', swatch: '#EF4444' },
+  { value: '#F97316', label: 'Naranja', swatch: '#F97316' },
+  { value: '#F59E0B', label: 'Ámbar', swatch: '#F59E0B' },
+  { value: '#EAB308', label: 'Amarillo', swatch: '#EAB308' },
+  { value: '#EC4899', label: 'Rosa', swatch: '#EC4899' },
+  { value: '#22C55E', label: 'Verde', swatch: '#22C55E' },
+  { value: '#14B8A6', label: 'Teal', swatch: '#14B8A6' },
+  { value: '#3B82F6', label: 'Azul', swatch: '#3B82F6' },
+  { value: '#6366F1', label: 'Índigo', swatch: '#6366F1' },
+  { value: '#8B5CF6', label: 'Violeta', swatch: '#8B5CF6' },
 ] as const;
- 
+
 /* ─────────────────────────────────────────────────────────────────
    SVG Icons
 ───────────────────────────────────────────────────────────────── */
@@ -169,7 +169,7 @@ const icons = {
     </svg>
   ),
 };
- 
+
 /* ─────────────────────────────────────────────────────────────────
    UI primitivos: Group + Btn
 ───────────────────────────────────────────────────────────────── */
@@ -181,7 +181,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
     </div>
   );
 }
- 
+
 function Btn({
   active, disabled, onClick, children, tooltip, wide = false,
 }: {
@@ -221,7 +221,7 @@ function Btn({
     </div>
   );
 }
- 
+
 /* ─────────────────────────────────────────────────────────────────
    ColorPicker — dropdown con paleta + input hex
 ───────────────────────────────────────────────────────────────── */
@@ -235,7 +235,7 @@ function ColorPicker({
   const [open, setOpen] = useState(false);
   const [hexInput, setHexInput] = useState('');
   const ref = useRef<HTMLDivElement>(null);
- 
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -243,14 +243,14 @@ function ColorPicker({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
- 
+
   // Sincronizar input cuando cambia desde la selección
   useEffect(() => {
     setHexInput(currentColor !== 'inherit' ? currentColor : '');
   }, [currentColor]);
- 
+
   const swatchColor = currentColor === 'inherit' || !currentColor ? 'currentColor' : currentColor;
- 
+
   return (
     <div ref={ref} className="relative group">
       <motion.button
@@ -270,14 +270,14 @@ function ColorPicker({
           {icons.colorText(swatchColor)}
         </span>
       </motion.button>
- 
+
       {!open && (
         <div className="pointer-events-none absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-[11px] bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 px-2 py-0.5 rounded whitespace-nowrap z-50">
           Color de texto
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100" />
         </div>
       )}
- 
+
       <AnimatePresence>
         {open && (
           <motion.div
@@ -289,7 +289,7 @@ function ColorPicker({
             style={{ width: 178, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
           >
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-2 select-none">Color de texto</p>
- 
+
             {/* Paleta 5×3 */}
             <div className="grid grid-cols-5 gap-1.5 mb-2.5">
               {COLORS.map((c) => {
@@ -312,7 +312,7 @@ function ColorPicker({
                   >
                     {isActive && (
                       <svg className="absolute inset-0 m-auto w-3 h-3" viewBox="0 0 12 12" fill="none"
-                        stroke={['#ffffff','#D1D5DB','#EAB308','#F59E0B'].includes(c.value) ? '#374151' : '#fff'}
+                        stroke={['#ffffff', '#D1D5DB', '#EAB308', '#F59E0B'].includes(c.value) ? '#374151' : '#fff'}
                         strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2 6 5 9 10 3" />
                       </svg>
@@ -327,7 +327,7 @@ function ColorPicker({
                 );
               })}
             </div>
- 
+
             {/* Input hex */}
             <div className="flex items-center gap-1.5">
               <div
@@ -361,7 +361,7 @@ function ColorPicker({
     </div>
   );
 }
- 
+
 /* ─────────────────────────────────────────────────────────────────
    ToolbarPlugin — componente principal
 ───────────────────────────────────────────────────────────────── */
@@ -372,48 +372,51 @@ export default function ToolbarPlugin({
 }) {
   const [editor] = useLexicalComposerContext();
   const { theme: appTheme } = useTheme();
+
+
+  const isDark = appTheme === "dark";
   const fileInputRef = useRef<HTMLInputElement>(null);
- 
-  const [canUndo,         setCanUndo]         = useState(false);
-  const [canRedo,         setCanRedo]         = useState(false);
-  const [isBold,          setIsBold]          = useState(false);
-  const [isItalic,        setIsItalic]        = useState(false);
-  const [isUnderline,     setIsUnderline]     = useState(false);
+
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
   const [isStrikethrough, setIsStrikethrough] = useState(false);
-  const [blockType,       setBlockType]       = useState('paragraph');
- 
+  const [blockType, setBlockType] = useState('paragraph');
+
   // Nuevos estados de estilo inline
-  const [fontSize,   setFontSize]   = useState('16px');
+  const [fontSize, setFontSize] = useState('16px');
   const [fontWeight, setFontWeight] = useState('400');
-  const [textColor,  setTextColor]  = useState('inherit');
- 
+  const [textColor, setTextColor] = useState('inherit');
+
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if (!$isRangeSelection(selection)) return;
- 
+
     setIsBold(selection.hasFormat('bold'));
     setIsItalic(selection.hasFormat('italic'));
     setIsUnderline(selection.hasFormat('underline'));
     setIsStrikethrough(selection.hasFormat('strikethrough'));
- 
+
     // Leer estilos inline actuales de la selección
     setFontSize($getSelectionStyleValueForProperty(selection, 'font-size', '16px'));
     setFontWeight($getSelectionStyleValueForProperty(selection, 'font-weight', '400'));
     setTextColor($getSelectionStyleValueForProperty(selection, 'color', 'inherit'));
- 
+
     const anchorNode = selection.anchor.getNode();
     const element =
       anchorNode.getKey() === 'root'
         ? anchorNode
         : anchorNode.getTopLevelElementOrThrow();
- 
-    if ($isHeadingNode(element))      setBlockType(element.getTag());
-    else if ($isListNode(element))    setBlockType(element.getListType());
-    else if ($isQuoteNode(element))   setBlockType('quote');
+
+    if ($isHeadingNode(element)) setBlockType(element.getTag());
+    else if ($isListNode(element)) setBlockType(element.getListType());
+    else if ($isQuoteNode(element)) setBlockType('quote');
     else if ($isDividerNode(element)) setBlockType('divider');
-    else                              setBlockType('paragraph');
+    else setBlockType('paragraph');
   }, []);
- 
+
   useEffect(() => {
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
@@ -428,7 +431,7 @@ export default function ToolbarPlugin({
       editor.registerCommand(CAN_REDO_COMMAND, (p) => (setCanRedo(p), false), COMMAND_PRIORITY_LOW),
     );
   }, [editor, $updateToolbar]);
- 
+
   /* Aplicar CSS inline a la selección usando $patchStyleText */
   const applyStyle = useCallback((style: Record<string, string>) => {
     editor.update(() => {
@@ -438,18 +441,18 @@ export default function ToolbarPlugin({
       }
     });
   }, [editor]);
- 
+
   const setBlock = useCallback((type: string) => {
     editor.update(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
- 
+
       const anchorNode = selection.anchor.getNode();
       const element =
         anchorNode.getKey() === 'root'
           ? anchorNode
           : anchorNode.getTopLevelElementOrThrow();
- 
+
       switch (type) {
         case 'paragraph': {
           const node = $createParagraphNode();
@@ -457,7 +460,7 @@ export default function ToolbarPlugin({
           element.replace(node); node.selectStart(); break;
         }
         case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': {
-          const node = $createHeadingNode(type as 'h1'|'h2'|'h3'|'h4'|'h5'|'h6');
+          const node = $createHeadingNode(type as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6');
           if ($isElementNode(element)) node.append(...element.getChildren());
           element.replace(node); node.selectStart(); break;
         }
@@ -482,7 +485,7 @@ export default function ToolbarPlugin({
       }
     });
   }, [editor]);
- 
+
   const handleUploadImage = useCallback((files: FileList | null) => {
     if (!files) return;
     Array.from(files).forEach((file) => {
@@ -494,19 +497,24 @@ export default function ToolbarPlugin({
       reader.readAsDataURL(file);
     });
   }, [editor]);
- 
+
   return (
-    <div className={appTheme === 'dark' ? 'dark' : ''}>
+    <div className={`
+    ${appTheme === 'dark' ? 'dark' : ''}
+  `}>
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: 'easeOut' }}
-        className="
-          flex items-center flex-wrap gap-y-1 gap-x-0 px-2 py-1.5
-          border-b border-gray-200 dark:border-gray-700
-          bg-white dark:bg-gray-900
-          sticky top-0 z-10
-        "
+        className={`
+      flex items-center flex-wrap gap-y-1 gap-x-0 px-2 py-1.5
+      sticky top-0 z-10 border-b
+
+      ${isDark 
+            ? 'bg-gray-900 border-gray-700 text-gray-100'
+            : 'bg-white border-gray-200 text-gray-800'
+          }
+    `}
       >
         {/* Historial */}
         <Group title="Historial">
@@ -517,15 +525,15 @@ export default function ToolbarPlugin({
             {icons.redo}
           </Btn>
         </Group>
- 
+
         {/* Fuente */}
         <Group title="Fuente">
-          <Btn active={isBold}          onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}          tooltip="Negrita">  {icons.bold}          </Btn>
-          <Btn active={isItalic}        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}        tooltip="Cursiva">   {icons.italic}        </Btn>
-          <Btn active={isUnderline}     onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')}     tooltip="Subrayado"> {icons.underline}     </Btn>
+          <Btn active={isBold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')} tooltip="Negrita">  {icons.bold}          </Btn>
+          <Btn active={isItalic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')} tooltip="Cursiva">   {icons.italic}        </Btn>
+          <Btn active={isUnderline} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')} tooltip="Subrayado"> {icons.underline}     </Btn>
           <Btn active={isStrikethrough} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')} tooltip="Tachado">   {icons.strikethrough} </Btn>
         </Group>
- 
+
         {/* ── TAMAÑO DE TEXTO ── */}
         <Group title="Tamaño">
           {FONT_SIZES.map((s) => (
@@ -553,7 +561,7 @@ export default function ToolbarPlugin({
             </div>
           ))}
         </Group>
- 
+
         {/* ── PESO DE FUENTE ── */}
         <Group title="Peso">
           {FONT_WEIGHTS.map((w) => (
@@ -582,7 +590,7 @@ export default function ToolbarPlugin({
             </div>
           ))}
         </Group>
- 
+
         {/* ── COLOR DE TEXTO ── */}
         <Group title="Color">
           <ColorPicker
@@ -594,7 +602,7 @@ export default function ToolbarPlugin({
             }}
           />
         </Group>
- 
+
         {/* Bloque */}
         <Group title="Bloque">
           <select
@@ -610,24 +618,24 @@ export default function ToolbarPlugin({
             <option value="h5">Heading 5</option>
             <option value="h6">Heading 6</option>
           </select>
-          <Btn active={blockType === 'quote'}   onClick={() => setBlock('quote')}   tooltip="Cita en bloque"> {icons.quote}   </Btn>
+          <Btn active={blockType === 'quote'} onClick={() => setBlock('quote')} tooltip="Cita en bloque"> {icons.quote}   </Btn>
           <Btn active={blockType === 'divider'} onClick={() => setBlock('divider')} tooltip="Divisor">        {icons.divider} </Btn>
         </Group>
- 
+
         {/* Listas */}
         <Group title="Listas">
           <Btn active={blockType === 'bullet'} onClick={() => setBlock('bullet')} tooltip="Lista con viñetas"> {icons.bulletList}  </Btn>
           <Btn active={blockType === 'number'} onClick={() => setBlock('number')} tooltip="Lista numerada">    {icons.orderedList} </Btn>
         </Group>
- 
+
         {/* Alineación */}
         <Group title="Alineación">
-          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')}    tooltip="Alinear izquierda"> {icons.alignLeft}    </Btn>
-          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')}  tooltip="Centrar">           {icons.alignCenter}  </Btn>
-          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')}   tooltip="Alinear derecha">   {icons.alignRight}   </Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left')} tooltip="Alinear izquierda"> {icons.alignLeft}    </Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center')} tooltip="Centrar">           {icons.alignCenter}  </Btn>
+          <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')} tooltip="Alinear derecha">   {icons.alignRight}   </Btn>
           <Btn onClick={() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')} tooltip="Justificar">        {icons.alignJustify} </Btn>
         </Group>
- 
+
         {/* Insertar */}
         <Group title="Insertar">
           <TableDropdown
