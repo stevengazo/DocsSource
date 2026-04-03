@@ -2,7 +2,7 @@ function TableOfContents({ headings, theme }: any) {
   const bgClass = theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800';
   const borderClass = theme === 'dark' ? 'border-gray-700' : 'border-gray-200';
   return (
-    <div className={`w-64 border-l ${borderClass} p-4 overflow-y-auto ${bgClass}`}>
+    <div className={`w-56 border-l ${borderClass} p-4 overflow-y-auto ${bgClass}`}>
       <h3 className="font-semibold mb-2">Tabla de Contenido</h3>
       <ol className="list-decimal list-inside space-y-1">
         {headings.map((h, idx) => {

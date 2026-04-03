@@ -70,7 +70,6 @@ function LoadFromLocalStoragePlugin() {
 }
 
 /* ---------- Editor Content ---------- */
-
 function EditorContent({
   activeTab,
   appTheme,
@@ -78,6 +77,7 @@ function EditorContent({
   bgClass,
   onChange,
   editorJSON,
+  headings,
 }: {
   activeTab: EditorTab;
   appTheme: string;
@@ -85,6 +85,7 @@ function EditorContent({
   bgClass: string;
   onChange: any;
   editorJSON: string;
+  headings: { text: string; level: number; id: string }[];
 }) {
   const { handleImageUpload } = useImageUpload();
 
@@ -98,35 +99,33 @@ function EditorContent({
 
       <div className="flex-1 overflow-auto p-4">
         {activeTab === 'editor' && (
-          <RichTextPlugin
-      
-            contentEditable={
-              <ContentEditable
-                className={` border shadow-2xl border-gray-200 px-3 min-h-[200px] w-full outline-none text-sm leading-relaxed ${appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
+          <div className='flex '>
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  className={`border shadow-2xl border-gray-200 px-3 min-h-[200px] w-full outline-none text-sm leading-relaxed ${
+                    appTheme === 'dark' ? 'text-gray-100' : 'text-gray-800'
                   }`}
-                aria-placeholder="Ingrese algún texto..."
-                placeholder={
-                  <div className="text-gray-400 pointer-events-none">
-                    Empieza a escribir algo...
-                  </div>
-                }
-              />
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
+            
+                />
+              }
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+
+            {/* Table of Contents dentro del editor */}
+            <TableOfContents headings={headings} theme={appTheme} />
+          </div>
         )}
 
         {activeTab === 'debug' && <DebugPanel data={editorJSON} />}
 
-        {activeTab === 'preview' && (
-          <EditorPreview value={editorJSON} />
-        )}
+        {activeTab === 'preview' && <EditorPreview value={editorJSON} />}
 
         <HistoryPlugin />
         <ListPlugin />
         <ImagePlugin />
         <LoadFromLocalStoragePlugin />
-        <TablePlugin/>
+        <TablePlugin />
         <MyOnChangePlugin onChange={onChange} />
       </div>
     </div>
@@ -134,7 +133,6 @@ function EditorContent({
 }
 
 /* ---------- MAIN ---------- */
-
 export default function Editor(): JSX.Element {
   const { theme: appTheme } = useTheme();
 
@@ -142,9 +140,7 @@ export default function Editor(): JSX.Element {
   const lastValue = useRef<string>('');
   const lastHeadings = useRef<string>('');
 
-  const [headings, setHeadings] = useState<
-    { text: string; level: number; id: string }[]
-  >([]);
+  const [headings, setHeadings] = useState<{ text: string; level: number; id: string }[]>([]);
 
   const tabs: EditorTab[] = ['editor', 'debug', 'preview'];
 
@@ -167,7 +163,6 @@ export default function Editor(): JSX.Element {
         AutoLinkNode,
         DividerNode,
         ImageNode,
-
         TableNode,
         TableRowNode,
         TableCellNode,
@@ -217,28 +212,19 @@ export default function Editor(): JSX.Element {
     });
   };
 
-  const bgClass =
-    appTheme === 'dark'
-      ? 'bg-gray-900 text-gray-100'
-      : 'bg-white text-gray-800';
-
-  const borderClass =
-    appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
+  const bgClass = appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-800';
+  const borderClass = appTheme === 'dark' ? 'border-gray-700' : 'border-gray-200';
 
   const renderTabs = () => (
     <div
-      className={`flex border-b ${borderClass} relative ${appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
-        }`}
+      className={`flex border-b ${borderClass} relative ${
+        appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
+      }`}
     >
       {tabs.map((t) => {
         const isActive = activeTab === t;
 
-        const label =
-          t === 'editor'
-            ? 'Editor'
-            : t === 'debug'
-              ? 'Debug'
-              : 'Preview';
+        const label = t === 'editor' ? 'Editor' : t === 'debug' ? 'Debug' : 'Preview';
 
         return (
           <button
@@ -246,19 +232,16 @@ export default function Editor(): JSX.Element {
             onClick={() => selectTab(t)}
             className="relative px-4 py-2 text-sm font-medium"
           >
-            <span
-              className={`relative z-10 ${getTabTextClass(t, appTheme)}`}
-            >
-              {label}
-            </span>
+            <span className={`relative z-10 ${getTabTextClass(t, appTheme)}`}>{label}</span>
 
             {isActive && (
               <motion.div
                 layoutId="tab-indicator"
-                className={`absolute inset-0 rounded-t-lg ${appTheme === 'dark'
+                className={`absolute inset-0 rounded-t-lg ${
+                  appTheme === 'dark'
                     ? 'bg-gray-700 border-x border-t border-gray-600'
                     : 'bg-white border-x border-t border-gray-200'
-                  }`}
+                }`}
               />
             )}
           </button>
@@ -269,9 +252,7 @@ export default function Editor(): JSX.Element {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div
-        className={`flex rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass} flex-1`}
-      >
+      <div className={`flex rounded-xl shadow-sm border ${borderClass} overflow-hidden ${bgClass} flex-1`}>
         <div className="flex flex-1 relative overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden">
             {renderTabs()}
@@ -284,13 +265,10 @@ export default function Editor(): JSX.Element {
                 bgClass={bgClass}
                 onChange={onChange}
                 editorJSON={editorJSON}
+                headings={headings} // <--- pasamos headings aquí
               />
             </LexicalComposer>
           </div>
-
-          {activeTab === 'editor' && (
-            <TableOfContents headings={headings} theme={appTheme} />
-          )}
         </div>
       </div>
     </div>

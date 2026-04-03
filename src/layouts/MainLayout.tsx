@@ -61,7 +61,7 @@ export default function MainLayout() {
       >
         {/* Left */}
         <div className="flex items-center gap-4">
-          <span className={`${isDark ? "text-gray-100" : "text-gray-800"} font-semibold`}>
+          <span className='text-orange-500 font-extrabold text-2xl'>
             DocuDan
           </span>
 
