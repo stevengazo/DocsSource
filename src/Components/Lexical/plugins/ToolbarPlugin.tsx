@@ -70,7 +70,7 @@ function Btn({ active, disabled, onClick, children, tooltip }: any) {
 }
 
 /* ---------- ToolbarPlugin Component ---------- */
-export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (files: FileList | null) => void }) {
+export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (files: FileList | null) => Promise<void> }) {
   const [editor] = useLexicalComposerContext();
   const { theme: appTheme } = useTheme(); // 'light' | 'dark'
 
@@ -218,7 +218,7 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
 
         {/* Párrafo */}
         <Group title="Párrafo">
-       <select
+          <select
             value={blockType}
             onChange={(e) => setBlock(e.target.value)}
             className="px-2 py-1 border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
@@ -249,7 +249,11 @@ export default function ToolbarPlugin({ onUploadImages }: { onUploadImages: (fil
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) => handleUploadImage(e.target.files)}
+            onChange={(e) => {
+              const files = e.target.files;
+              handleUploadImage(files);
+              onUploadImages?.(files); // 👈 aquí usas el prop externo
+            }}
             className="hidden"
           />
         </Group>

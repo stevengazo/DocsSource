@@ -1,10 +1,48 @@
-import { createCommand, type LexicalCommand, type LexicalEditor, $getRoot, $insertNodes } from 'lexical';
+// ImagePlugin.tsx
+import {
+  createCommand,
+  type LexicalCommand,
+  type LexicalEditor,
+  $insertNodes,
+} from 'lexical';
 import { useEffect, type JSX } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { DecoratorNode } from 'lexical';
+import { mediaFileReader } from '@lexical/utils';
 
 /* ---------- Comando para insertar imagen ---------- */
-export const INSERT_IMAGE_COMMAND: LexicalCommand<{ src: string }> = createCommand();
+export const INSERT_IMAGE_COMMAND: LexicalCommand<{ src: string }> =
+  createCommand();
+
+/* ---------- Hook para subir imágenes (CORRECTO) ---------- */
+export function useImageUpload() {
+  const [editor] = useLexicalComposerContext();
+
+  // 🔹 Tu lógica original reutilizada
+  const uploadImages = async (
+    files: File[],
+    editor: LexicalEditor
+  ) => {
+    const results = await mediaFileReader(files, ['image/']);
+
+    results.forEach((file) => {
+      editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
+        src: file.result,
+      });
+    });
+  };
+
+  // 🔹 Adaptador compatible con Toolbar
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files) return;
+
+    await uploadImages(Array.from(files), editor);
+  };
+
+  return {
+    handleImageUpload,
+  };
+}
 
 /* ---------- Nodo de imagen ---------- */
 export class ImageNode extends DecoratorNode<JSX.Element> {
@@ -49,7 +87,13 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(): JSX.Element {
-    return <img src={this.__src} className="max-w-full rounded-md" alt="" />;
+    return (
+      <img
+        src={this.__src}
+        className="max-w-full rounded-md"
+        alt=""
+      />
+    );
   }
 }
 
@@ -61,9 +105,12 @@ export default function ImagePlugin(): null {
     return editor.registerCommand<{ src: string }>(
       INSERT_IMAGE_COMMAND,
       (payload) => {
-        const { src } = payload;
-        const imageNode = new ImageNode(src);
-        $insertNodeToNearestRoot(editor, imageNode);
+        const imageNode = new ImageNode(payload.src);
+
+        editor.update(() => {
+          $insertNodes([imageNode]);
+        });
+
         return true;
       },
       0
@@ -71,13 +118,4 @@ export default function ImagePlugin(): null {
   }, [editor]);
 
   return null;
-}
-
-/* ---------- Función auxiliar para insertar nodo ---------- */
-function $insertNodeToNearestRoot(editor: LexicalEditor, node: ImageNode) {
-  editor.update(() => {
-    const root = $getRoot();
-    $insertNodes([node]);
-    node.selectNext();
-  });
 }

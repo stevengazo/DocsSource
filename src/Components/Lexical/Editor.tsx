@@ -12,10 +12,9 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { LinkNode, AutoLinkNode } from '@lexical/link';
-import { mediaFileReader } from '@lexical/utils';
 
+import ImagePlugin, { ImageNode, useImageUpload } from './plugins/ImagePlugin';
 import { DividerNode } from './plugins/DividerNode';
-import ImagePlugin, { ImageNode, INSERT_IMAGE_COMMAND } from './plugins/ImagePlugin';
 
 import { useTheme } from '../../context/ThemeContext';
 import { useTabs } from '../../hooks/useTabs';
@@ -28,15 +27,69 @@ import { DebugPanel } from '../DebugPanel';
 import theme from './theme';
 import { $getRoot } from 'lexical';
 
+/* ---------- Error Handler ---------- */
 function onError(error: Error): void {
-   console.error(error);
+  console.error(error);
 }
 
+/* ---------- Contenido interno (IMPORTANTE) ---------- */
+function EditorContent({
+  activeTab,
+  appTheme,
+  borderClass,
+  bgClass,
+  onChange,
+  editorJSON,
+}: any) {
+  const { handleImageUpload } = useImageUpload();
+
+  return (
+    <>
+      {activeTab === 'editor' && (
+        <div className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}>
+          <ToolbarPlugin onUploadImages={handleImageUpload} />
+        </div>
+      )}
+
+      <div className="p-4 min-h-[250px] flex-1 overflow-y-auto">
+        {activeTab === 'editor' ? (
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className={`min-h-[200px] outline-none text-sm leading-relaxed ${
+                  appTheme === 'dark'
+                    ? 'text-gray-100'
+                    : 'text-gray-800'
+                }`}
+                aria-placeholder="Ingrese algún texto..."
+                placeholder={
+                  <div className="text-gray-400 pointer-events-none">
+                    Empieza a escribir algo...
+                  </div>
+                }
+              />
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+        ) : (
+          <DebugPanel data={editorJSON} />
+        )}
+
+        <HistoryPlugin />
+        <ListPlugin />
+        <ImagePlugin />
+        <MyOnChangePlugin onChange={onChange} />
+      </div>
+    </>
+  );
+}
+
+/* ---------- Editor principal ---------- */
 export default function Editor(): JSX.Element {
   const { theme: appTheme } = useTheme();
 
   const [editorJSON, setEditorJSON] = useState<string>(
-    JSON.stringify( {})
+    JSON.stringify({})
   );
 
   const [headings, setHeadings] = useState<
@@ -76,13 +129,12 @@ export default function Editor(): JSX.Element {
     const serializedObj = editorState.toJSON();
     const serialized = JSON.stringify(serializedObj);
 
-    // 🚫 Evitar loop infinito
     if (serialized === lastValue.current) return;
     lastValue.current = serialized;
 
     setEditorJSON(serialized);
 
-    // Headings
+    // 🔹 Extraer headings
     editor.update(() => {
       const root = $getRoot();
       const newHeadings: { text: string; level: number; id: string }[] = [];
@@ -101,20 +153,6 @@ export default function Editor(): JSX.Element {
       });
 
       setHeadings(newHeadings);
-    });
-
-  };
-
-  const handleImageUpload = async (
-    files: File[],
-    editor: import('lexical').LexicalEditor
-  ) => {
-    const results = await mediaFileReader(files, ['image/']);
-
-    results.forEach((file) => {
-      editor.dispatchCommand(INSERT_IMAGE_COMMAND, {
-        src: file.result,
-      });
     });
   };
 
@@ -142,7 +180,10 @@ export default function Editor(): JSX.Element {
             className="relative px-4 py-2 text-sm font-medium"
           >
             <span
-              className={`relative z-10 ${getTabTextClass(t as 'editor' | 'debug', appTheme)}`}
+              className={`relative z-10 ${getTabTextClass(
+                t as 'editor' | 'debug',
+                appTheme
+              )}`}
             >
               {t === 'editor' ? 'Editor' : 'Debug'}
             </span>
@@ -174,45 +215,14 @@ export default function Editor(): JSX.Element {
             {renderTabs()}
 
             <LexicalComposer initialConfig={initialConfig}>
-      
-
-              {activeTab === 'editor' && (
-                <div
-                  className={`sticky top-0 z-10 border-b ${borderClass} ${bgClass}`}
-                >
-                  <ToolbarPlugin onUploadImages={handleImageUpload} />
-                </div>
-              )}
-
-              <div className="p-4 min-h-[250px] flex-1 overflow-y-auto">
-                {activeTab === 'editor' ? (
-                  <RichTextPlugin
-                    contentEditable={
-                      <ContentEditable
-                        className={`min-h-[200px] outline-none text-sm leading-relaxed ${
-                          appTheme === 'dark'
-                            ? 'text-gray-100'
-                            : 'text-gray-800'
-                        }`}
-                        aria-placeholder="Ingrese algún texto..."
-                        placeholder={
-                          <div className="text-gray-400 pointer-events-none">
-                            Empieza a escribir algo...
-                          </div>
-                        }
-                      />
-                    }
-                    ErrorBoundary={LexicalErrorBoundary}
-                  />
-                ) : (
-                  <DebugPanel data={editorJSON} />
-                )}
-
-                <HistoryPlugin />
-                <ListPlugin />
-                <ImagePlugin />
-                <MyOnChangePlugin onChange={onChange} />
-              </div>
+              <EditorContent
+                activeTab={activeTab}
+                appTheme={appTheme}
+                borderClass={borderClass}
+                bgClass={bgClass}
+                onChange={onChange}
+                editorJSON={editorJSON}
+              />
             </LexicalComposer>
           </div>
 
