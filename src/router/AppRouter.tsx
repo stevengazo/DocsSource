@@ -6,6 +6,9 @@ import Home from "../pages/Home";
 import EditorPage from "../pages/EditorPage";
 import NotFound from "../pages/NotFound";
 import DocumentsPage from "../pages/DocumentsPage";
+import DepartamentsPage from '../pages/DepartamentsPage'
+import SettingsPage from "../pages/SettingsPage";
+import MyProfilePage from "../pages/MyProfilePage";
 
 export default function AppRouter() {
   return (
@@ -15,6 +18,10 @@ export default function AppRouter() {
           <Route path="/" element={<Home />} />
           <Route path="/editor/:id" element={<EditorPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/departaments" element={<DepartamentsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/my-profile" element={<MyProfilePage />} />
+          
         </Route>
 
         {/* fallback */}

@@ -14,12 +14,12 @@ export default function MainLayout() {
       <Link to={path} className="relative px-3 py-1.5 text-sm">
         <span
           className={`relative z-10 ${active
-              ? theme === "dark"
-                ? "text-gray-900"
-                : "text-white"
-              : theme === "dark"
-                ? "text-gray-300"
-                : "text-gray-600"
+            ? theme === "dark"
+              ? "text-gray-900"
+              : "text-white"
+            : theme === "dark"
+              ? "text-gray-300"
+              : "text-gray-600"
             }`}
         >
           {label}
@@ -56,8 +56,10 @@ export default function MainLayout() {
 
           <nav className="flex items-center gap-2">
             {navItem("/", "Inicio")}
-            {navItem("/documents", "Documentos")}
-            {navItem("/editor", "Editor")}
+            {navItem("/documents", "Mis Documentos")}
+            {navItem("/departaments", "Departamentos")}
+            {navItem("/settings", "Configuración")}
+            {navItem("/my-profile", "Mi Perfil")}
           </nav>
         </div>
 
