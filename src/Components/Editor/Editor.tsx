@@ -1,6 +1,6 @@
 // src/Components/Lexical/Editor.tsx
 
-import { useMemo, useState, useRef, type JSX } from 'react';
+import { useMemo, useState, useRef, type JSX, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -28,9 +28,11 @@ import { DebugPanel } from './DebugPanel';
 
 import theme from '../../utils/theme';
 import { $getRoot } from 'lexical';
-import { useEffect } from 'react';
+import EditorPreview from './EditorPreview';
 
 const LOCAL_STORAGE_KEY = 'lexical-editor-content';
+
+type EditorTab = 'editor' | 'debug' | 'preview';
 
 function onError(error: Error): void {
   console.error(error);
@@ -50,11 +52,9 @@ function LoadFromLocalStoragePlugin() {
 
       const editorState = editor.parseEditorState(saved);
 
-      // ✅ Mover fuera del ciclo de render actual
       queueMicrotask(() => {
         editor.setEditorState(editorState);
       });
-
     } catch (error) {
       console.error('Error cargando editor:', error);
     }
@@ -72,7 +72,14 @@ function EditorContent({
   bgClass,
   onChange,
   editorJSON,
-}: any) {
+}: {
+  activeTab: EditorTab;
+  appTheme: string;
+  borderClass: string;
+  bgClass: string;
+  onChange: any;
+  editorJSON: string;
+}) {
   const { handleImageUpload } = useImageUpload();
 
   return (
@@ -84,7 +91,7 @@ function EditorContent({
       )}
 
       <div className="flex-1 overflow-auto p-4">
-        {activeTab === 'editor' ? (
+        {activeTab === 'editor' && (
           <RichTextPlugin
             contentEditable={
               <ContentEditable
@@ -101,10 +108,12 @@ function EditorContent({
             }
             ErrorBoundary={LexicalErrorBoundary}
           />
-        ) : (
-          <div className="h-full">
-            <DebugPanel data={editorJSON} />
-          </div>
+        )}
+
+        {activeTab === 'debug' && <DebugPanel data={editorJSON} />}
+
+        {activeTab === 'preview' && (
+          <EditorPreview value={editorJSON} />
         )}
 
         <HistoryPlugin />
@@ -130,9 +139,11 @@ export default function Editor(): JSX.Element {
     { text: string; level: number; id: string }[]
   >([]);
 
-  const { activeTab, selectTab, getTabTextClass } = useTabs({
+  const tabs: EditorTab[] = ['editor', 'debug', 'preview'];
+
+  const { activeTab, selectTab, getTabTextClass } = useTabs<EditorTab>({
     initialTab: 'editor',
-    tabs: ['editor', 'debug'],
+    tabs,
   });
 
   const initialConfig = useMemo(
@@ -154,8 +165,7 @@ export default function Editor(): JSX.Element {
     []
   );
 
-  /* ---------- FIX AQUÍ ---------- */
-  const onChange = (editorState: any, editor: any) => {
+  const onChange = (editorState: any) => {
     const serializedObj = editorState.toJSON();
     const serialized = JSON.stringify(serializedObj);
 
@@ -170,7 +180,6 @@ export default function Editor(): JSX.Element {
       console.error('Error guardando:', error);
     }
 
-    /* ✅ USAR read en lugar de update */
     editorState.read(() => {
       const root = $getRoot();
       const newHeadings: any[] = [];
@@ -211,22 +220,26 @@ export default function Editor(): JSX.Element {
         appTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
       }`}
     >
-      {['editor', 'debug'].map((t) => {
+      {tabs.map((t) => {
         const isActive = activeTab === t;
+
+        const label =
+          t === 'editor'
+            ? 'Editor'
+            : t === 'debug'
+            ? 'Debug'
+            : 'Preview';
 
         return (
           <button
             key={t}
-            onClick={() => selectTab(t as 'editor' | 'debug')}
+            onClick={() => selectTab(t)}
             className="relative px-4 py-2 text-sm font-medium"
           >
             <span
-              className={`relative z-10 ${getTabTextClass(
-                t as 'editor' | 'debug',
-                appTheme
-              )}`}
+              className={`relative z-10 ${getTabTextClass(t, appTheme)}`}
             >
-              {t === 'editor' ? 'Editor' : 'Debug'}
+              {label}
             </span>
 
             {isActive && (
