@@ -1,3 +1,4 @@
+// src/pages/EditorPage.tsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Editor from '../Components/Editor/Editor';
@@ -12,7 +13,6 @@ const mockVersions = [
   { id: "2", updatedAt: new Date(), author: "Steven", comment: "Agregado sección de resumen", content: {} },
   { id: "3", updatedAt: new Date(), author: "Steven", comment: "Corrección de typos", content: {} },
 ];
-
 
 export default function EditorPage() {
   const { theme } = useTheme();
@@ -40,77 +40,60 @@ export default function EditorPage() {
 
   return (
     <div
-      className={`
-        h-screen-85 flex flex-row
-        ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}
-      `}
+      className={`h-screen-85 flex flex-row ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}
     >
       {/* Panel lateral */}
       <motion.div
-        className={`
-          px-4 py-6 border-r
-          ${isDark ? 'border-gray-700' : 'border-gray-200'}
-        `}
-        animate={{ width: collapsed ? 0 : '30%' }}
-        initial={{ width: '30%' }}
+        className={`px-2 py-4 ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
+        animate={{ width: collapsed ? 0 : '22%' }} // más estrecho
+        initial={{ width: '22%' }}
         transition={{ duration: 0.4 }}
       >
         {!collapsed && (
           <>
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-3xl font-bold">
-                Información del Documento
-              </h1>
+            <div className="flex justify-between items-center mb-2">
+              <h1 className="text-xl font-bold">Información del Documento</h1> {/* título más pequeño */}
 
               <button
                 onClick={() => setCollapsed(true)}
-                className={`
-                  text-sm px-2 py-1 rounded transition
-                  ${isDark
-                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}
-                `}
+                className={`text-xs px-2 py-1 rounded transition ${
+                  isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                }`}
               >
                 Ocultar
               </button>
             </div>
 
-            <div>
-              <DocumentInfo doc={document} />
-
+            <div className="space-y-6">
+              <DocumentInfo doc={document}  />
+              <br/>
               <DocumentHistory
                 versions={mockVersions}
                 onViewVersion={(v) => console.log("Ver:", v)}
                 onRestoreVersion={(v) => console.log("Restaurar:", v)}
               />
-
             </div>
-
-
           </>
         )}
       </motion.div>
 
       {/* Editor */}
       <motion.div
-        className="flex flex-col justify-center px-4 py-6 gap-4"
+        className="flex flex-col justify-center px-4 py-4 gap-4"
         animate={{
-          width: collapsed ? '100%' : '70%',
+          width: collapsed ? '100%' : '78%', // ajustado para que ocupe más espacio cuando el lateral está expandido
           margin: collapsed ? '0 auto' : '0',
         }}
-        initial={{ width: '70%' }}
+        initial={{ width: '78%' }}
         transition={{ duration: 0.4 }}
       >
         <div className="flex justify-end mb-2">
           {collapsed && (
             <button
               onClick={() => setCollapsed(false)}
-              className={`
-                text-sm px-2 py-1 rounded transition
-                ${isDark
-                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}
-              `}
+              className={`text-xs px-2 py-1 rounded transition ${
+                isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+              }`}
             >
               Mostrar información
             </button>

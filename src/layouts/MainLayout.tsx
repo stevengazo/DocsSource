@@ -2,7 +2,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
-import { Home, FileText, Users, Settings, User } from "lucide-react"; // Lucide icons
+import { Home, FileText, Users, Settings, User, Sun, Moon } from "lucide-react"; // Agregamos Sun y Moon
 
 export default function MainLayout() {
   const location = useLocation();
@@ -29,15 +29,14 @@ export default function MainLayout() {
       : "text-gray-600";
 
     const bgColor = active
-      ? "bg-orange-500" // color activo rojo/naranja
-      : "bg-gray-200 dark:bg-gray-700"; // gris más suave cuando no está activo
+      ? "bg-orange-500"
+      : "bg-gray-200 dark:bg-gray-700";
 
     return (
       <Link to={path} className="relative px-3 py-1.5 text-sm rounded-md flex items-center">
         {iconsMap[path]}
         <span className={`relative z-10 ${baseText}`}>{label}</span>
 
-        {/* Animated background */}
         {active && (
           <motion.div
             layoutId="nav-pill"
@@ -78,9 +77,9 @@ export default function MainLayout() {
         <div className="flex items-center gap-3">
           <button
             onClick={toggleTheme}
-            className="text-sm hover:text-orange-400 transition"
+            className="p-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-700 transition flex items-center justify-center"
           >
-            {isDark ? "Modo Claro" : "Modo Oscuro"}
+            {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-800" />}
           </button>
 
           <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-xs font-medium text-gray-700">
