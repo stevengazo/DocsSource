@@ -1,7 +1,7 @@
+// src/components/Documents/DocumentHistoryMock.tsx
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, RotateCw, Plus } from "lucide-react";
-import type { Document } from "../../types/Document";
 import { useTheme } from "../../context/ThemeContext";
 
 interface Version {
@@ -9,59 +9,34 @@ interface Version {
   updatedAt: Date;
   author: string;
   comment?: string;
-  content: any;
+  content?: any;
 }
 
-interface DocumentHistoryProps {
-  versions: Version[];
-  onViewVersion: (version: Version) => void;
-  onRestoreVersion: (version: Version) => void;
-}
+const MOCK_VERSIONS: Version[] = [
+  { id: "v1", updatedAt: new Date("2026-04-01T10:00:00"), author: "Steven", comment: "Versión inicial" },
+  { id: "v2", updatedAt: new Date("2026-04-02T14:30:00"), author: "Luis", comment: "Correcciones menores" },
+  { id: "v3", updatedAt: new Date("2026-04-03T09:15:00"), author: "Ana", comment: "Actualización de secciones" },
+];
 
-const DocumentHistory = ({ versions, onViewVersion, onRestoreVersion }: DocumentHistoryProps) => {
-  const [newComment, setNewComment] = useState("");
+const DocumentHistory = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [versions, setVersions] = useState<Version[]>(MOCK_VERSIONS);
+  const [newComment, setNewComment] = useState("");
 
-  const handleAddVersion = () => {
-    if (!newComment.trim()) return;
-    alert(`Nueva versión confirmada: "${newComment}"`);
-    setNewComment("");
+
+
+  const handleViewVersion = (version: Version) => {
+    alert(`Viendo versión:\nID: ${version.id}\nAutor: ${version.author}\nComentario: ${version.comment}`);
   };
 
+
+
   return (
-    <div
-      className={`my-2 rounded-2xl flex flex-col gap-4 transition-colors
-        ${isDark ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"}`}
+    <div className={`my-4 rounded-2xl flex flex-col gap-6 p-4 transition-colors
+      ${isDark ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"}`}
     >
-      {/* Campo de nueva versión */}
-      <div className="flex flex-col gap-2">
-        <h3 className={`text-lg font-semibold ${isDark ? "text-gray-100" : "text-gray-800"}`}>Nueva versión</h3>
-        <div className="flex flex-row gap-1.5 items-center">
-          <input
-            type="text"
-            placeholder="Comentario para la nueva versión..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className={`w-full px-3 py-2 text-sm rounded border transition
-              ${isDark
-                ? "bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-400"
-                : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-              }`}
-          />
-          <button
-            onClick={handleAddVersion}
-            className="flex items-center gap-1 px-3 py-2 text-sm rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium transition relative group"
-          >
-            <Plus size={16} />
-            Confirmar
-            {/* Tooltip */}
-            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-0.5 text-xs rounded bg-gray-800 text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Agregar nueva versión
-            </span>
-          </button>
-        </div>
-      </div>
+      
 
       {/* Historial de versiones */}
       <div>
@@ -83,24 +58,18 @@ const DocumentHistory = ({ versions, onViewVersion, onRestoreVersion }: Document
                     {version.comment || "Sin comentario"}
                   </p>
                   <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                    {new Date(version.updatedAt).toLocaleString()} - {version.author}
+                    {version.updatedAt.toLocaleString()} - {version.author}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => onViewVersion(version)}
+                    onClick={() => handleViewVersion(version)}
                     className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition"
                     title="Ver versión"
                   >
                     <Eye size={16} />
                   </button>
-                  <button
-                    onClick={() => onRestoreVersion(version)}
-                    className="p-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition"
-                    title="Restaurar versión"
-                  >
-                    <RotateCw size={16} />
-                  </button>
+     
                 </div>
               </motion.li>
             ))}

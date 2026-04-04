@@ -53,7 +53,7 @@ const DocumentCard = ({ documents }: DocumentCardProps) => {
           {/* Botones de acción */}
           <div className="flex gap-3 mt-auto">
             <motion.button
-              onClick={() => navigate(`/viewer/${doc.id}`)}
+              onClick={() => navigate(`/document/${doc.id}`)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className={`p-2 rounded-lg transition

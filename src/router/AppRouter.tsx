@@ -9,6 +9,7 @@ import DocumentsPage from "../pages/DocumentsPage";
 import DepartamentsPage from '../pages/DepartamentsPage'
 import SettingsPage from "../pages/SettingsPage";
 import MyProfilePage from "../pages/MyProfilePage";
+import DocumentView from "../pages/DocumentView";
 
 export default function AppRouter() {
   return (
@@ -21,7 +22,8 @@ export default function AppRouter() {
           <Route path="/departaments" element={<DepartamentsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/my-profile" element={<MyProfilePage />} />
-          
+          <Route path="/document/:id" element={<DocumentView />} />
+
         </Route>
 
         {/* fallback */}
